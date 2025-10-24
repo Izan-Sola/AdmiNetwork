@@ -1,0 +1,10 @@
+
+jQuery 
+express, sql
+node js
+node ssh
+XAMPP
+ngrok
+phpmyadmin
+nmap
+ip
