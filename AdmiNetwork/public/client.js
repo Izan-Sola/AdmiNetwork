@@ -14,14 +14,14 @@ function networkScan(subnet = 0) {
     .then(data => {
         console.log(data.networks[0])
         networks = data.networks
-        fetch('/getHostsFromNetwork', {
+        fetch('/loadNetworkData', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ subnet: networks[0].cidr })
+            body: JSON.stringify({ network: networks[0].cidr })
         })
         .then(res => res.json())
         .then(data => {
-            appendHostsAndNetworks(data.hosts, networks)
+            appendHostsAndNetworks(data.networkData, networks)
         })
         
     })
@@ -32,7 +32,16 @@ function networkScan(subnet = 0) {
 function appendHostsAndNetworks(hosts, networks) {
    
    
-   // $('.networks').empty();
+   //$('.networks').empty();
+   availableNetworks = []
+      console.log($('.networks').children().length)
+    if($('.networks').children().length > 0) {
+            [$('.networks').children()].forEach( item => {
+                cidr = item.children().children().children()[1].textContent.trim()
+                availableNetworks.push(cidr)
+            })
+        }
+        console.log(availableNetworks)
     $('.cards').empty();
     console.log(hosts, networks)
     if(hosts != 0) {
@@ -68,20 +77,24 @@ function appendHostsAndNetworks(hosts, networks) {
    
     if(networks != 0) {
         networks.forEach(network => {
-            $('.cards').empty();
-            const networkCard = $(`<div class="network-item" role="listitem"">
-                <div class="left">
-                <div class="dot" style="background:linear-gradient(180deg,#60a5fa,#3b82f6)"></div>
-                <div class="meta">
-                    <div class="title">${network.interface}</div>
-                    <div class="sub"> ${network.cidr}</div>
-                </div>
-                </div>
-                <div style="font-size:13px;color:var(--muted)"> ${$('.cards').children().length} hosts</div>
-            </div>
-            </div>
-        `);
-        $('.networks').append(networkCard)
+
+            if(!availableNetworks.includes(network.cidr)) {
+                $('.cards').empty();
+                        const networkCard = $(`<div class="network-item" role="listitem"">
+                            <div class="left">
+                            <div class="dot" style="background:linear-gradient(180deg,#60a5fa,#3b82f6)"></div>
+                            <div class="meta">
+                                <div class="title">${network.interface}</div>
+                                <div class="sub"> ${network.cidr}</div>
+                            </div>
+                            </div>
+                            <div style="font-size:13px;color:var(--muted)"> ${$('.cards').children().length} hosts</div>
+                        </div>
+                        </div>
+                    `);
+                    $('.networks').append(networkCard)
+            }
+     
     })
     }
 
@@ -115,14 +128,14 @@ function scanAllNetworks() {
         console.log(data.networks)
 
     data.networks.forEach( network => {
-        fetch('/getHostsFromNetwork', {
+        fetch('/loadNetworkData', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ subnet: network.cidr  })
+            body: JSON.stringify({ network: network.cidr  })
         })
         .then(res => res.json())
         .then(data => {
-            appendHostsAndNetworks(data.hosts, [network])
+            appendHostsAndNetworks(0, [network])
         })
     })
 
@@ -139,7 +152,7 @@ function loadAllNetworks() {
     })
     .then(res => res.json())
     .then(data => {
-        appendHostsAndNetworks(0, data.networkData[0])
+        appendHostsAndNetworks(0, [data.networkData[0]])
     })
 }
 
@@ -155,7 +168,7 @@ function loadNetwork(network) {
     .then(res => res.json())
     .then(data => {
         console.log(data)
-        appendHostsAndNetworks(data.networkData[0], 0)
+        appendHostsAndNetworks(data.networkData, 0)
     })
 }
 
