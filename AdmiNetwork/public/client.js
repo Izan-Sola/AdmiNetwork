@@ -116,7 +116,7 @@ $(document).ready(function () {
 
 //* Scan all the available network interfaces
 function scanAllNetworks() {
-    alert("Scanning ALL the available networks. This might take a while, please wait.")
+    //alert("Scanning ALL the available networks. This might take a while, please wait.")
 
     fetch('/getAllNetworks', {
         method: 'POST',

@@ -12,11 +12,12 @@ const evilscan = require('evilscan')
 const nmap = require('node-nmap')
 nmap.nmapLocation = "/usr/bin/nmap"
 
-// NEW: Initialize Database Connection Pool
+// Initialize Database Connection Pool
 const pool = mysql.createPool({
     host: "localhost",
     user: "root",
     password: "",
+    port: 3306,
     database: "netscan",
     waitForConnections: true,
     connectionLimit: 15, // Increased connection limit slightly for parallel operations
@@ -287,7 +288,7 @@ async function getDatabaseConnection() {
 }
 
 
-//* wait (Kept for completeness, though unused)
+//* wait 
 function wait(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms)
@@ -313,9 +314,9 @@ async function createNetworkTableIfNotExists(tableName, con) {
             UNIQUE unique_host_ip (host_ip)
         ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
         `
-        await con.query(createTable) // CRITICAL: Ensure we await the query
+        await con.query(createTable) 
     } catch (error) {
         console.error(`Error creating table ${tableName}:`, error)
-        throw error; // Re-throw to be caught by the calling function's try/catch
+        throw error; 
     }
 }
