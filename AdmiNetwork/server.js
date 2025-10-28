@@ -12,7 +12,7 @@ const evilscan = require('evilscan')
 const nmap = require('node-nmap')
 nmap.nmapLocation = "/usr/bin/nmap"
 
-// Initialize Database Connection Pool
+
 const pool = mysql.createPool({
     host: "localhost",
     user: "root",
@@ -20,18 +20,17 @@ const pool = mysql.createPool({
     port: 3306,
     database: "netscan",
     waitForConnections: true,
-    connectionLimit: 15, // Increased connection limit slightly for parallel operations
+    connectionLimit: 15,
     queueLimit: 0
 })
 
-app.set('port', 3000)
+app.set('port', 3001)
 app.use(cors())
 app.use(bodyParser.json())
 app.use(express.json())
 app.use(express.static('public'))
 const NetWorkScanner = require('network-scanner-js')
 const netScan = new NetWorkScanner()
-// Increased listeners for concurrent Nmap scans
 require('events').EventEmitter.defaultMaxListeners = 50 
 const networkInfo = require('network-info')
 
@@ -42,7 +41,7 @@ const webSocketServer = new WebSocketServer({
 })
 
 webSocketServer.on("request", function (req) {
-    if (req.origin === 'https://monthly-devoted-pug.ngrok-free.app') {
+    if (req.origin === 'http://adminetwork.duckdns.org') {
         const connection = req.accept(null, req.origin)
         connection.on("close", function () {
                     console.log("Server closed")
@@ -52,8 +51,8 @@ webSocketServer.on("request", function (req) {
     }
 })
 
-server.listen(3000, '192.168.18.48', () => {
-    console.log('Server started on 192.168.18.48:3000')
+server.listen(3001, '0.0.0.0', () => {
+    console.log('Server started on 192.168.18.48')
 })
 
 
@@ -62,16 +61,15 @@ server.listen(3000, '192.168.18.48', () => {
 
 //* Endpoint for scanning every available network if possible
 app.post('/getAllNetworks', async (req, res) => {
-    // 1. AWAIT getNetworksInfo, which starts all Nmap scans concurrently and WAITS for all of them to finish.
+
     const networks = await getNetworksInfo({
         scanHosts: true
     })
 
-    // 2. Await saving the network metadata concurrently.
+    //Save the network metadata concurrently.
     const savePromises = networks.map(network => saveNetworkInfo(network))
     await Promise.allSettled(savePromises) 
 
-    // 3. Respond after all work is done.
     res.json({ networks })
 })
 
@@ -127,8 +125,7 @@ async function getNetworksInfo(options = {}) {
            }
         }
     }
-    
-    // CRITICAL: Wait for ALL concurrent Nmap scans and their database writes to complete.
+
     if (scanHosts && scanPromises.length > 0) {
         console.log(`Waiting for ${scanPromises.length} network scans to complete...`)
         const scanResults = await Promise.allSettled(scanPromises)
@@ -175,22 +172,21 @@ function retrieveHostInfo(subnet) {
         scan.once('complete', (data) => {
             console.log(`NMAP found ${data.length} hosts in ${subnet}. Starting concurrent saves...`)
             
-            // CRITICAL FIX: Run database saves CONCURRENTLY (in parallel)
+
             const savePromises = data.map(hostData =>
                 saveHostsInfo(subnet, hostData).catch(err => {
                     console.error(`Error saving host ${hostData.ip}:`, err.message)
-                    return { status: 'rejected', reason: err } // Return a rejected status for allSettled
+                    return { status: 'rejected', reason: err } 
                 })
             )
             
-            // Wait for ALL hosts to be saved before resolving the Nmap scan promise
             Promise.allSettled(savePromises)
                 .then(() => {
                     console.log(`All host save operations completed for ${subnet}`)
                     resolve({ subnet: subnet, hosts: data.length }) 
                 })
                 .catch(err => {
-                    // This catch block handles internal Promise.allSettled errors, rare but safe
+                    
                     console.error(`Error during concurrent host saving coordination for ${subnet}:`, err)
                     resolve({ subnet: subnet, hosts: data.length, error: 'Internal save coordination failure' })
                 })
@@ -198,13 +194,31 @@ function retrieveHostInfo(subnet) {
         
         scan.once('error', (err) => {
             console.error(`NMAP scan error for ${subnet}:`, err)
-            reject(err) // Reject the promise on scan error
+            reject(err) 
         })
         scan.startScan()
     })
 }
 
-//? <----- DATABASE FUNCTIONS (Using Pool) ----->
+
+//* Update the name and operative system of the specified host
+app.post('/updateHostInfo', async (req, res) => {
+    const { hostIP, newName, newOs, networkCIDR } = req.body;
+
+    if (!hostIP || !networkCIDR) {
+        return res.status(400).json({ success: false, message: 'Host IP and Network CIDR are required.' });
+    }
+
+    try {
+        await updateHostInfo(hostIP, newName, newOs, networkCIDR);
+        res.json({ success: true, message: `Host ${hostIP} updated successfully.` });
+    } catch (error) {
+        console.error('Error updating host information:', error);
+        res.status(500).json({ success: false, message: 'Failed to update host in database.', error: error.message });
+    }
+});
+
+//? <----- DATABASE FUNCTIONS ----->
 
 //* Create a new table for the network if it doesnt exist, and insert the host
 async function saveHostsInfo(network, hostData) {
@@ -229,7 +243,7 @@ async function saveHostsInfo(network, hostData) {
         console.error('Database error for host', hostData.ip, ':', err)
         throw err
     } finally {
-        if (con) con.release() // CRITICAL: Release connection back to pool
+        if (con) con.release()
     }
 }
 
@@ -244,7 +258,7 @@ async function saveNetworkInfo(network) {
         } catch (err) {
             console.error('Database error when inserting networkdata', network, err)
         } finally {
-            if (con) con.release() // CRITICAL: Release connection back to pool
+            if (con) con.release() 
         }
 
 }
@@ -279,6 +293,24 @@ async function loadNetworkData(targetCIDR) {
         }
 }
 
+//* Update the name and operative system of the specified host
+async function updateHostInfo(hostIP, newName, newOs, networkCIDR) {
+    const tableName = convertIPtoTableName(networkCIDR);
+    const con = await getDatabaseConnection();
+
+    try {
+        const updateHost = `UPDATE ${tableName} SET host_name = ?, host_os = ? WHERE host_ip = ?;`;   
+        const [result] = await con.query(updateHost, [newName, newOs, hostIP ]);
+
+        return { message: 'Update successful', result};
+
+    } catch (err) {
+        console.error('Database error during host update:', err);
+        throw err;
+    } finally {
+        con.release();
+    }
+}
 
 //? <------ UTILITY FUNCTIONS ------>
 
@@ -300,7 +332,7 @@ function convertIPtoTableName(IP) {
     IP = IP.replace(/[.\/]/g, '_')
     return IP
 }
-//* Self explanatory - Requires a connection object to be passed
+//* Self explanatory
 async function createNetworkTableIfNotExists(tableName, con) {
     try {
         const createTable = `

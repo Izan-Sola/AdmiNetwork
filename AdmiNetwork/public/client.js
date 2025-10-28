@@ -1,4 +1,4 @@
-
+let selectedNetworkCIDR = 0;
 //*Scan the target network
 function networkScan(subnet = 0) {
     const IP = $('#scan-network').val();
@@ -58,13 +58,13 @@ function appendHostsAndNetworks(hosts, networks) {
                             <div class="ip">${host.host_ip}</div>
                         </div>
     
-                        <input type="text" class="os" value="OS: ${host.host_os}" disabled>
-                        <div class="ping">Last ping: <strong>${host.last_ping}</strong></div>
+                        <input type="text" class="os" value="${host.host_os}" disabled>
+                        <div class="ping">Last ping: &nbsp;<strong>  ${host.last_ping}</strong></div>
     
                         <div class="bottom-row">
                             <div class="status up">🟢 UP</div>
                             <div class="card-actions">
-                                <button class="btn-ghost">Edit</button>
+                                <button class="btn-ghost" onclick="editDeviceCardInfo(this.closest('.device-card'))">Edit</button>
                                 <button class="btn">Connect</button>
                             </div>
                         </div>
@@ -101,6 +101,7 @@ function appendHostsAndNetworks(hosts, networks) {
     $('.network-item').on('click', function () {
 
          network = $(this).children().children().children()[1].textContent.trim()
+         selectedNetworkCIDR = network
          loadNetwork(network)
     });
 }
@@ -172,15 +173,50 @@ function loadNetwork(network) {
     })
 }
 
-//* Pings every host from every network to check connectivity
-function pingAllHosts() {
-    fetch('/pingAllHosts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ empty: "" })
-    })
-    .then(res => res.json())
-    .then(data => { 
-        console.log(data)
-    })
+function editDeviceCardInfo(cardElement) {
+        card = cardElement
+        inputName = $(card).find('input.name')
+        inputOs = $(card).find('input.os')
+        inputEdit =  $(card).find('button').first()
+        inputEdit.text('Save');
+        inputEdit.attr('onclick', `saveDeviceCardInfo()`)
+        inputName.attr('disabled', false);
+        inputName.addClass('editing');
+        inputOs.addClass('editing');
+        inputOs.attr('disabled', false);
+        inputName.focus();
 }
+
+function saveDeviceCardInfo() {
+
+        hostIP = $(card).find('div.ip').text();
+
+        fetch('./updateHostInfo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({newName: inputName.val(), newOs: inputOs.val(), hostIP, networkCIDR: selectedNetworkCIDR  })
+        })
+        .then(res => res.json())
+        .then(data => {
+            inputEdit.text('Edit');
+            inputName.attr('disabled', true);
+            inputOs.attr('disabled', true);
+            inputEdit.attr('onclick', `editDeviceCardInfo(this.closest('.device-card'))`)
+            inputName.removeClass('editing');
+            inputOs.removeClass('editing');
+            console.log(data.message)
+        })
+}
+
+//* For later: Pings every host from every network to check connectivity
+// function pingAllHosts() {
+//     fetch('/pingAllHosts', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({ empty: "" })
+//     })
+//     .then(res => res.json())
+//     .then(data => { 
+//         console.log(data)
+//     })
+// }

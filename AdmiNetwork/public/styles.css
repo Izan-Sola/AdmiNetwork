@@ -356,6 +356,11 @@ aside>.networks>.network-item:hover {
   display: flex;
 }
 
+.editing {
+  border: 1px rgba(180, 177, 177, 0.781) solid !important;
+  border-radius: 2px;
+}
+
 /* --- Responsive --- */
 @media (max-width: 1400px) {
   .device-card {
