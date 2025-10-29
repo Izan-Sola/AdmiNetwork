@@ -1,4 +1,6 @@
+
 let selectedNetworkCIDR = 0;
+
 //*Scan the target network
 function networkScan(subnet = 0) {
     const IP = $('#scan-network').val();
@@ -12,7 +14,7 @@ function networkScan(subnet = 0) {
     })
     .then(res => res.json())
     .then(data => {
-        console.log(data.networks[0])
+      //  console.log(data.networks[0])
         networks = data.networks
         fetch('/loadNetworkData', {
             method: 'POST',
@@ -30,24 +32,26 @@ function networkScan(subnet = 0) {
 
 //* Append the hosts' and networks' info
 function appendHostsAndNetworks(hosts, networks) {
+ //  console.log(networks)
    
-   
-   //$('.networks').empty();
-   availableNetworks = []
-      console.log($('.networks').children().length)
-    if($('.networks').children().length > 0) {
-            [$('.networks').children()].forEach( item => {
-                cidr = item.children().children().children()[1].textContent.trim()
-                availableNetworks.push(cidr)
-            })
-        }
-        console.log(availableNetworks)
+   //
+//    availableNetworks = []
+//       console.log($('.networks').children().length)
+//     if($('.networks').children().length > 0) {
+//             [$('.networks').children()].forEach( item => {
+//                 cidr = item.children().children().children()[1].textContent.trim()
+//                 availableNetworks.push(cidr)
+//             })
+//         }
+//         console.log(availableNetworks)
     $('.cards').empty();
-    console.log(hosts, networks)
+  //  console.log(hosts, networks)
     if(hosts != 0) {
+
+        $('.stats strong')[1].innerText = hosts.length
         hosts.forEach(host => {
        
-            console.log(host.host_ip)
+        //    console.log(host.host_ip)
             const card = $(`
                 <article class="device-card" role="article" tabindex="0">
                     <div class="device-avatar">${host.host_ip.split('.').pop()}</div>
@@ -74,11 +78,12 @@ function appendHostsAndNetworks(hosts, networks) {
             $('.cards').append(card);
         });
     }
-   
+  // console.log(networks[0])
     if(networks != 0) {
+        $('.networks').empty();
         networks.forEach(network => {
-
-            if(!availableNetworks.includes(network.cidr)) {
+            
+           // if(!availableNetworks.includes(network.cidr)) {
                 $('.cards').empty();
                         const networkCard = $(`<div class="network-item" role="listitem"">
                             <div class="left">
@@ -88,12 +93,11 @@ function appendHostsAndNetworks(hosts, networks) {
                                 <div class="sub"> ${network.cidr}</div>
                             </div>
                             </div>
-                            <div style="font-size:13px;color:var(--muted)"> ${$('.cards').children().length} hosts</div>
                         </div>
                         </div>
                     `);
                     $('.networks').append(networkCard)
-            }
+        //    }
      
     })
     }
@@ -109,16 +113,27 @@ function appendHostsAndNetworks(hosts, networks) {
 $(document).ready(function () {
     console.log("LOADING!")
     loadAllNetworks();
-//    $('.network-item').on('click', function () {
-//     console.log("click click clcik")
-//    });
+    $('.search input').on('input', function (k) {
+        searchText = $(this).val()     
+        searchCoincidences(searchText)
+   });
 });
 
+//*Search bar function. Searches for coincidences on the ip and the name, hiding the respective cards when there is no match.
+function searchCoincidences(searchText) {
+    ipDivs = $('.cards').find('div.ip')
+    nameDivs = $('.cards').find('input.name')
+    cardList = $('.cards').children()
+    for (i=0; i <= cardList.length-1; i++) {       
+        regExp = new RegExp(`.*${searchText}.*`, "i");
+        if(ipDivs[i].textContent.match(regExp) != null|| nameDivs[i].value.match(regExp) != null) 
+             $(ipDivs[i]).closest('.device-card').removeClass('hidden');      
+        else $(ipDivs[i]).closest('.device-card').addClass('hidden');     
+    }   
+}
 
 //* Scan all the available network interfaces
 function scanAllNetworks() {
-    //alert("Scanning ALL the available networks. This might take a while, please wait.")
-
     fetch('/getAllNetworks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -126,7 +141,7 @@ function scanAllNetworks() {
     })
     .then(res => res.json())
     .then(data => {
-        console.log(data.networks)
+     //   console.log(data.networks)
 
     data.networks.forEach( network => {
         fetch('/loadNetworkData', {
@@ -153,12 +168,11 @@ function loadAllNetworks() {
     })
     .then(res => res.json())
     .then(data => {
-        appendHostsAndNetworks(0, [data.networkData[0]])
+        appendHostsAndNetworks(0, [data.networkData][0])
     })
 }
 
 //* Load the target network hosts from the database
-
 function loadNetwork(network) {
    
     fetch('/loadNetworkData', {
@@ -168,11 +182,12 @@ function loadNetwork(network) {
     })
     .then(res => res.json())
     .then(data => {
-        console.log(data)
+    //    console.log(data)
         appendHostsAndNetworks(data.networkData, 0)
     })
 }
 
+//* Enables the name and OS inputs for editing.
 function editDeviceCardInfo(cardElement) {
         card = cardElement
         inputName = $(card).find('input.name')
@@ -186,7 +201,7 @@ function editDeviceCardInfo(cardElement) {
         inputOs.attr('disabled', false);
         inputName.focus();
 }
-
+//* Sends the new name and OS to the server
 function saveDeviceCardInfo() {
 
         hostIP = $(card).find('div.ip').text();
@@ -204,7 +219,7 @@ function saveDeviceCardInfo() {
             inputEdit.attr('onclick', `editDeviceCardInfo(this.closest('.device-card'))`)
             inputName.removeClass('editing');
             inputOs.removeClass('editing');
-            console.log(data.message)
+         //   console.log(data.message)
         })
 }
 
