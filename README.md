@@ -8,6 +8,5 @@ Logs information about each host like the last ping, last ssh connection, active
 
 info i need, todos...:
 
-stop using xampp for database, move to MySQL, something centralized, expose it with OCI free tier.
 wont expose the web, it will be a local web app that will scan the available network interfaces and send all the data to the database.
 admin users will be able to see ALL the hosts of EVERY network, no matter where they connect from, since it will load all the data from the centralized database.
