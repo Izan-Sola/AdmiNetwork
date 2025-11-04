@@ -56,8 +56,6 @@ server.listen(3000, '0.0.0.0', () => {
     console.log('Server started on 192.168.18.48')
 })
 
-
-
 //? <------ NETWORK FUNCTIONS ------->
 
 //* Endpoint for scanning every available network if possible
@@ -220,7 +218,6 @@ app.post('/updateHostInfo', async (req, res) => {
 
 //* Ping every host in the list to check connectivity
 app.post('/pingAllHosts', async (req, res) => {
-    
 
     const hostsToPing = req.body.allHostsToPing; 
     const pingPromises = hostsToPing.map(host => 
@@ -228,8 +225,7 @@ app.post('/pingAllHosts', async (req, res) => {
     );
 
     let results;
-    try {
-        results = await Promise.all(pingPromises);
+    try { results = await Promise.all(pingPromises);
     } catch (e) {
         console.error("An error occurred during one or more pings:", e);
         return res.status(500).json({ error: "Failed to complete all ping checks." });
@@ -293,23 +289,6 @@ app.post('/loadNetworkData', async (req, res) => {
   res.json({ networkData })
 })
 
-app.post('/getAllNetworksHosts', async (req, res) => {
-
-            const con = await getDatabaseConnection()
-            const allHostsList = []
-            const getNetworks = `SELECT cidr FROM networks_data`
-            const networkList = await con.query(getNetworks)
-
-            for (const network of networkList[0]) { 
-                const tableName = convertIPtoTableName(network.cidr);
-                const getHosts = `SELECT host_ip FROM ${tableName}`;
-                
-                const hostList = await con.query(getHosts); 
-                console.log(hostList)
-                allHostsList.push(hostList);
-            }
-            res.json({ allHostsList })
-})
 
 //* Retrieve the data of all the networks, or only (?the hosts of?) a target network
 async function loadNetworkData(targetCIDR) {
@@ -356,6 +335,25 @@ async function updateHostInfo(hostIP, newName, newOs, networkCIDR) {
     }
 }
 
+
+//* Retrieve ALL hosts of ALL networks
+app.post('/getAllNetworksHosts', async (req, res) => {
+
+            const con = await getDatabaseConnection()
+            const allHostsList = []
+            const getNetworks = `SELECT cidr FROM networks_data`
+            const networkList = await con.query(getNetworks)
+
+            for (const network of networkList[0]) { 
+                const tableName = convertIPtoTableName(network.cidr);
+                const getHosts = `SELECT host_ip FROM ${tableName}`;
+                
+                const hostList = await con.query(getHosts); 
+                console.log(hostList)
+                allHostsList.push(hostList);
+            }
+            res.json({ allHostsList })
+})
 //? <------ UTILITY FUNCTIONS ------>
 
 //* Connect to database (Now returns a connection from the pool)
