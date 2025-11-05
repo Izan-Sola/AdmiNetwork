@@ -163,7 +163,6 @@ function scanAllNetworks() {
 }
 
 //* Load every network's data from the database 
-
 function loadAllNetworks() {
     fetch('/loadNetworkData', {
         method: 'POST',
@@ -211,7 +210,7 @@ function saveDeviceCardInfo() {
 
         hostIP = $(card).find('div.ip').text();
 
-        fetch('./updateHostInfo', {
+        fetch('./updateHostDetails', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({newName: inputName.val(), newOs: inputOs.val(), hostIP, networkCIDR: selectedNetworkCIDR  })
@@ -230,9 +229,9 @@ function saveDeviceCardInfo() {
 
 //* For later: Pings every host from every network to check connectivity
 function pingAllHosts() {
-    ipDivs = $('.cards').find('div.ip')
-    ipList =  Array.from(ipDivs, (div) => div.innerHTML)
-    console.log(ipList)
+    // ipDivs = $('.cards').find('div.ip')
+    // ipList =  Array.from(ipDivs, (div) => div.innerHTML)
+    // console.log(ipList)
     fetch('/pingAllHosts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -242,10 +241,11 @@ function pingAllHosts() {
     .then(data => { 
         console.log(data)
     })
+
+    //* 
 }
 
 function getAllNetworksHosts() {
-
     fetch('/getAllNetworksHosts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -254,7 +254,6 @@ function getAllNetworksHosts() {
     .then(res => res.json())
     .then(data => {
         console.log(data.allHostsList)
-      //  allHostsListToPing 
      data.allHostsList.forEach(hostList => {
         console.log(hostList)
         hostList[0].forEach(host => {

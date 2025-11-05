@@ -34,6 +34,7 @@ const NetWorkScanner = require('network-scanner-js')
 const netScan = new NetWorkScanner()
 require('events').EventEmitter.defaultMaxListeners = 50 
 const networkInfo = require('network-info')
+const { table } = require('console')
 
 //? <------ WEBSOCKET ------>
 const webSocketServer = new WebSocketServer({
@@ -200,7 +201,7 @@ function retrieveHostInfo(subnet) {
 
 
 //* Update the name and operative system of the specified host
-app.post('/updateHostInfo', async (req, res) => {
+app.post('/updateHostDetails', async (req, res) => {
     const { hostIP, newName, newOs, networkCIDR } = req.body;
 
     if (!hostIP || !networkCIDR) {
@@ -208,7 +209,7 @@ app.post('/updateHostInfo', async (req, res) => {
     }
 
     try {
-        await updateHostInfo(hostIP, newName, newOs, networkCIDR);
+        await updateHostDetails(hostIP, newName, newOs, networkCIDR);
         res.json({ success: true, message: `Host ${hostIP} updated successfully.` });
     } catch (error) {
         console.error('Error updating host information:', error);
@@ -230,16 +231,44 @@ app.post('/pingAllHosts', async (req, res) => {
         console.error("An error occurred during one or more pings:", e);
         return res.status(500).json({ error: "Failed to complete all ping checks." });
     }
-    const connectivityStatus = results.map(res => ({
-        ip: res.numeric_host,
-        status: res.alive ? 'up' : 'down',
-        time: res.time 
-    }));
-
+    const connectivityStatus = results.map((res, index) => {
+        
+        const networkIP = hostsToPing[index].network_ip;
+        
+        return {
+            ip: res.numeric_host,
+            network_ip: networkIP,
+            status: res.alive ? 'up' : 'down',
+            time: res.time 
+        };
+    });
+    for ( const result of connectivityStatus ) {
+        updateHostStatus(result)
+    } 
     res.json({ connectivityStatus });
 });
 
 //? <----- DATABASE FUNCTIONS ----->
+
+//* Update the status and the last ping date
+async function updateHostStatus(result) {
+    //console.log(result)
+    const con = await getDatabaseConnection()
+    try {   
+        const isAlive = (result.status == 'up') ? true : false
+        const hostIP = result.ip
+        const tableName = convertIPtoTableName(result.network_ip)
+        console.log(tableName)
+        const updateStatus = `UPDATE ${tableName} SET isAlive = ?, last_ping = NOW() WHERE host_ip = ?`
+        await con.query(updateStatus, [ isAlive, hostIP ])
+    }
+    catch (e) {
+        console.log("Error on updating host stauts: ", e)
+    }
+    finally {
+        con.release()
+    }
+}
 
 //* Create a new table for the network if it doesnt exist, and insert the host
 async function saveHostsInfo(network, hostData) {
@@ -288,8 +317,6 @@ app.post('/loadNetworkData', async (req, res) => {
   const [networkData] = await loadNetworkData(req.body.network)
   res.json({ networkData })
 })
-
-
 //* Retrieve the data of all the networks, or only (?the hosts of?) a target network
 async function loadNetworkData(targetCIDR) {
 
@@ -317,7 +344,7 @@ async function loadNetworkData(targetCIDR) {
 }
 
 //* Update the name and operative system of the specified host
-async function updateHostInfo(hostIP, newName, newOs, networkCIDR) {
+async function updateHostDetails(hostIP, newName, newOs, networkCIDR) {
     const tableName = convertIPtoTableName(networkCIDR);
     const con = await getDatabaseConnection();
 
@@ -346,12 +373,13 @@ app.post('/getAllNetworksHosts', async (req, res) => {
 
             for (const network of networkList[0]) { 
                 const tableName = convertIPtoTableName(network.cidr);
-                const getHosts = `SELECT host_ip FROM ${tableName}`;
+                const getHosts = `SELECT host_ip, network_ip FROM ${tableName}`;
                 
                 const hostList = await con.query(getHosts); 
-                console.log(hostList)
+             //   console.log(hostList)
                 allHostsList.push(hostList);
             }
+            
             res.json({ allHostsList })
 })
 //? <------ UTILITY FUNCTIONS ------>

@@ -1,10 +1,10 @@
 
 jQuery 
-express, sql
+express, Musql
 node js
 node ssh
-XAMPP
-ngrok
-phpmyadmin
+Electron 
 nmap
+xterm
 ip
+ping
