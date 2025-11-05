@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NetPanel — Layout</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="libs/require.js"></script>
+  <script src="libs/jquery-3.7.1.js"></script>
+  <script src="clientNetworkFunctions.js"></script>
+
+</head>
+<body>
+  <div class="app">
+    
+    <aside class="sidebar" aria-label="Redes disponibles">
+
+      <div class="brand">
+        <div class="logo">NP</div>
+        <div>
+          <h1>NetPanel</h1>
+          <p>Network administration</p>
+        </div>
+      </div>
+
+      <div class="scan-box" role="region" aria-label="Scan network">
+        <label for="scan-network">Scan a network</label>
+        <div class="row">
+          <input id="scan-network" type="text" placeholder="HOST IP" />
+          <input id="scan-mask" type="text" placeholder="Mask (e.g: 24, 16, 18)"/>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:8px">
+          <button class="btn" type="button" onclick="networkScan()">Scan Network</button>
+          <button class="btn" type="button" onclick="scanAllNetworks()">Auto-Scan</button>
+          <button class="btn btn-ghost" type="button" style="background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.03)">Import</button>
+        </div>
+      </div>
+
+      <div style="font-size:13px;color:var(--muted);margin-top:6px">Available networks</div>
+      <div class="networks" role="list">
+       
+          
+
+
+        <!-- <div class="footer">Logged as <strong>admin</strong></div> -->
+      
+    </aside>
+
+    <main class="main" role="main">
+      <div class="topbar">
+        <div class="search">
+          <input style="border: 1px solid rgba(255, 255, 255, 0.5);" placeholder="Search device or IP" />
+          <button class="btn">Search</button>
+        </div>
+        <div class="stats">
+          <div>Network: <strong>LAN</strong></div>
+          <div>Scanned: <strong>12</strong></div>
+          <div>Active: <strong style="color:var(--success)">9</strong></div>
+        </div>
+      </div>
+
+      <section class="content" aria-live="polite">
+        <h2 style="margin:10px;font-size:18px">Devices</h2>
+
+        <div class="cards" aria-label="Devices list">
+
+
+        
+
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

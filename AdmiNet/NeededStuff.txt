@@ -1,0 +1,10 @@
+
+jQuery 
+express, Musql
+node js
+node ssh
+Electron 
+nmap
+xterm
+ip
+ping
