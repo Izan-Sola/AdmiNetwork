@@ -42,6 +42,9 @@ function appendHostsAndNetworks(hosts, networks) {
         hosts.forEach(host => {
 
             //    console.log(host.host_ip)
+            // currentStatusDiv.html("🔴 DOWN")) 
+            //     : (currentStatusDiv.addClass('status up'),  currentStatusDiv.html("🟢 UP"));
+
             const card = $(`
                 <article class="device-card" role="article" tabindex="0">
                     <div class="device-avatar">${host.host_ip.split('.').pop()}</div>
@@ -53,10 +56,10 @@ function appendHostsAndNetworks(hosts, networks) {
                         </div>
     
                         <input type="text" class="os" value="${host.host_os}" disabled>
-                        <div class="ping">Last ping: &nbsp;<strong>  ${host.last_ping}</strong></div>
+                        <div class="ping">Last ping: &nbsp;<strong> ${host.last_ping}</strong></div>
     
                         <div class="bottom-row">
-                            <div class="status up">🟢 UP</div>
+                            <div class="${(host.isAlive == 1) ? "status up" : "status down"}">${(host.isAlive == 1) ? "🟢 UP" : "🔴 DOWN"}</div>
                             <div class="card-actions">
                                 <button class="btn-ghost" onclick="editDeviceCardInfo(this.closest('.device-card'))">Edit</button>
                                 <button class="btn">Connect</button>
@@ -231,7 +234,7 @@ function updateHostStatus(status) {
         for (let y = 0; y <= status.length - 1; y++) {
             if (status[y].ip == currentIpDiv.html()) {
                 currentStatusDiv.removeClass();
-                (status[y].status == 'up') 
+                (status[y].status == 'down') 
                 ? (currentStatusDiv.addClass('status down'), currentStatusDiv.html("🔴 DOWN")) 
                 : (currentStatusDiv.addClass('status up'),  currentStatusDiv.html("🟢 UP"));
                 break;
