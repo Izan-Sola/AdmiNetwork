@@ -25,11 +25,16 @@ const pool = mysql.createPool({
     queueLimit: 0
 })
 
-app.set('port', 3000)
+app.set('port', 3001)
 app.use(cors())
 app.use(bodyParser.json())
 app.use(express.json())
 app.use(express.static('public'))
+const path = require('path')
+// app.get('/', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'public', 'index.html'))
+// })
+
 const NetWorkScanner = require('network-scanner-js')
 const netScan = new NetWorkScanner()
 require('events').EventEmitter.defaultMaxListeners = 50 
@@ -43,7 +48,7 @@ const webSocketServer = new WebSocketServer({
 })
 
 webSocketServer.on("request", function (req) {
-    if (req.origin === '172.30.199.117:3000') {
+    if (req.origin === 'http://adminetwork.duckdns.org') {
         const connection = req.accept(null, req.origin)
         connection.on("close", function () {
                     console.log("Server closed")
@@ -53,7 +58,7 @@ webSocketServer.on("request", function (req) {
     }
 })
 
-server.listen(3000, '0.0.0.0', () => {
+server.listen(3001, '0.0.0.0', () => {
     console.log('Server started on 192.168.18.48')
 })
 
