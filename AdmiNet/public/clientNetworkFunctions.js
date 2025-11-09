@@ -63,6 +63,7 @@ function appendHostsAndNetworks(hosts, networks) {
                             <div class="card-actions">
                                 <button class="btn-ghost" onclick="editDeviceCardInfo(this.closest('.device-card'))">Edit</button>
                                 <button class="btn">Connect</button>
+                                <button class="btn-ghost" onclick="removeDeviceCard(this.closest('.device-card'))"> 🗑️ </button>
                             </div>
                         </div>
                     </div>
@@ -114,7 +115,7 @@ $(document).ready(function () {
     });
     getAllNetworksHosts()
 
-    pingInterval = setInterval(pingAllHosts, 5000)
+    pingInterval = setInterval(pingAllHosts, 10000)
     
 });
 
@@ -277,4 +278,22 @@ function getAllNetworksHosts() {
             })
             //   console.log(allHostsToPing)
         })
+}
+
+//* Remove the selected host card and from the database
+function removeDeviceCard(card) {
+    hostIP = $(card).find('div.ip')[0].textContent
+    console.log(hostIP)
+    opt = confirm("Are you sure you want to remove this device card?")
+    $(card).remove()
+    if (opt) {
+        fetch('/removeHost', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ hostIP, selectedNetworkCIDR })
+        })
+    }
+
+
+
 }

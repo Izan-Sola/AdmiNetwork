@@ -5,14 +5,24 @@ const express = require('express')
 const cors = require('cors')
 const app = express()
 const server = require('http').Server(app)
+const rateLimiter = require('express-rate-limit')
 const WebSocketServer = require("websocket").server
 const os = require('os')
 const ip = require('ip')
 const nmap = require('node-nmap')
 
 const ping = require('ping');
-nmap.nmapLocation = "C:/Program Files (x86)/Nmap/nmap.exe"
+nmap.nmapLocation = "/usr/bin/nmap"
 
+const rateLimit = rateLimiter({
+	windowMs: 2 * 60 * 1000, // 2 minutes
+	limit: 1000, // Limit each IP to 1000 requests per `window` (here, per 15 minutes).
+	standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+	ipv6Subnet: 56, // Set to 60 or 64 to be less aggressive, or 52 or 48 to be more aggressive
+	// store: ... , // Redis, Memcached, etc. 
+})
+app.use(rateLimit)
 
 const pool = mysql.createPool({
     host: "localhost",
@@ -31,9 +41,6 @@ app.use(bodyParser.json())
 app.use(express.json())
 app.use(express.static('public'))
 const path = require('path')
-// app.get('/', (req, res) => {
-//     res.sendFile(path.join(__dirname, 'public', 'index.html'))
-// })
 
 const NetWorkScanner = require('network-scanner-js')
 const netScan = new NetWorkScanner()
@@ -57,7 +64,7 @@ webSocketServer.on("request", function (req) {
         req.reject()
     }
 })
-
+//TODO: SSH CONNECTION, COLUMN FOR PORT AND SERVICE INFO...
 server.listen(3001, '0.0.0.0', () => {
     console.log('Server started on 192.168.18.48')
 })
@@ -389,6 +396,19 @@ app.post('/getAllNetworksHosts', async (req, res) => {
             
             res.json({ allHostsList })
 })
+
+//* Remove a host from the table
+app.post('/removeHost', async (req, res) => {
+    const con = await getDatabaseConnection()
+    const networkCIDR = convertIPtoTableName(req.body.selectedNetworkCIDR)
+    try {
+        con.query(`DELETE FROM ${networkCIDR} WHERE host_ip = "${req.body.hostIP}"`) 
+    } catch (error) {
+        console.log("Error deleting the host", error, hostIP)
+    } finally { 
+        res.sendStatus(200)
+        con.release() }
+}) 
 //? <------ UTILITY FUNCTIONS ------>
 
 //* Connect to database (Now returns a connection from the pool)
