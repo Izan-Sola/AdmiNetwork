@@ -31,13 +31,15 @@
 
 
 $(document).ready(function () {   
-    barArray = ['&emsp;&emsp;', '&emsp;&emsp;', '&emsp;&emsp;', '&emsp;&emsp;', '&emsp;&emsp;', '&emsp;&emsp;']
+    t='&emsp;&emsp;'
+    d='⇒&emsp;'
+    barArray = Array(6).fill(t);
     setInterval(() => {
-            for(let i=0; i<7; i++) {
+            for(let i=0; i<6; i++) {
                 setTimeout(() => {   
                     $.each(barArray, function (index, value) { 
-                        if (index == i && value == '&emsp;&emsp;') barArray.splice(index, 1, '⇒&emsp;')
-                        else if (index == i && value == '⇒&emsp;') barArray.splice(index, 1, '&emsp;&emsp;')
+                        if (index == i && value == t) barArray.splice(index, 1, d)
+                        else if (index == i && value == d) barArray.splice(index, 1, t)
                     });
                     bar = barArray.toString().replaceAll(",", "&nbsp;")
                     $('#progress-bar').html(bar)
