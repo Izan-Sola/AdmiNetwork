@@ -81,18 +81,16 @@ function appendHostsAndNetworks(hosts, networks) {
             $('.cards').empty();
             const networkCard = $(`<div class="network-item" role="listitem"">
                             <div class="left">
-                            <div class="dot" style="background:linear-gradient(180deg,#60a5fa,#3b82f6)"></div>
-                            <div class="meta">
-                                <div class="title">${network.interface}</div>
-                                <div class="sub"> ${network.cidr}</div>
-                            </div>
+                                <div class="dot" style="background:linear-gradient(180deg,#60a5fa,#3b82f6)"></div>
+                                <div class="meta">
+                                    <div class="title">${network.interface}</div>
+                                    <div class="sub"> ${network.cidr}</div>
+                                </div>
                             </div>
                         </div>
                         </div>
                     `);
             $('.networks').append(networkCard)
-            //    }
-
         })
     }
 
