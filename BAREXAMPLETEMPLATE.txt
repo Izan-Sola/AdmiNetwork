@@ -1,0 +1,47 @@
+<<<<------ PROGRESS BAR TEMPLATE/EXAMPLE ------->>>>
+
+<<< HTML >>>
+
+<body>
+<script src="jquery-3.7.1.js"></script>
+<script src="test.js"></script>
+<div id="wait-for-scan">
+    <div id="wait-animation">
+    <span id="mail-icon">✉️</span> <span id="progress-bar"></span> <span id="pc-icon">🖥️</span>
+    </div>
+</div>
+
+<style>
+
+    #wait-for-scan {
+        background-color: rgba(102, 210, 230, 0.658);
+        position: relative;
+        width: 265px;
+    }
+    #pc-icon {
+        position: absolute;
+        left: 240px;
+    }
+</style>
+ 
+</body>
+
+
+<<< JAVASCRIPT >>>
+
+
+$(document).ready(function () {   
+    barArray = ['&emsp;&emsp;', '&emsp;&emsp;', '&emsp;&emsp;', '&emsp;&emsp;', '&emsp;&emsp;', '&emsp;&emsp;']
+    setInterval(() => {
+            for(let i=0; i<7; i++) {
+                setTimeout(() => {   
+                    $.each(barArray, function (index, value) { 
+                        if (index == i && value == '&emsp;&emsp;') barArray.splice(index, 1, '⇒&emsp;')
+                        else if (index == i && value == '⇒&emsp;') barArray.splice(index, 1, '&emsp;&emsp;')
+                    });
+                    bar = barArray.toString().replaceAll(",", "&nbsp;")
+                    $('#progress-bar').html(bar)
+                }, i*150)
+            }
+    }, 650)
+});               
