@@ -13,7 +13,7 @@ const nmap = require('node-nmap')
 
 const ping = require('ping');
 nmap.nmapLocation = "/usr/bin/nmap"
-
+let clientConn = null;
 const rateLimit = rateLimiter({
 	windowMs: 2 * 60 * 1000, // 2 minutes
 	limit: 1000, // Limit each IP to 1000 requests per `window` (here, per 15 minutes).
@@ -27,7 +27,7 @@ app.use(rateLimit)
 const pool = mysql.createPool({
     host: "localhost",
     user: "root",
-    password: "",
+    password: "1234567890",
     port: 3306,
     database: "netscan",
     waitForConnections: true,
@@ -55,11 +55,12 @@ const webSocketServer = new WebSocketServer({
 })
 
 webSocketServer.on("request", function (req) {
-    if (req.origin === 'http://localhost') {
-        const connection = req.accept(null, req.origin)
+    if (req.origin === 'http://localhost' || req.origin === 'http://adminetwork.duckdns.org') {
+    const connection = req.accept(null, req.origin)
         connection.on("close", function () {
                     console.log("Server closed")
         })
+        clientConn = connection;
     } else {
         req.reject()
     }
@@ -99,10 +100,11 @@ async function getNetworksInfo(options = {}) {
     for (const interfaceName in interfaces) {
         
         for (const iface of interfaces[interfaceName]) {
+      
             if (iface.family === 'IPv4' && !iface.internal) {
                 const subnet = ip.subnet(iface.address, iface.netmask)
                 const interfaceCIDR = `${subnet.networkAddress}/${subnet.subnetMaskLength}`
-
+                clientConn.sendUTF(JSON.stringify({ interface: interfaceCIDR }))
                 if (targetCIDR) {
                     const [targetHostIP] = targetCIDR.split('/')           
                     if (iface.address === targetHostIP) {

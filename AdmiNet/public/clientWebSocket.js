@@ -1,7 +1,7 @@
 
 
 function openConnection() {
-    wsocket = new WebSocket('ws://localhost:3001/')
+   wsocket = new WebSocket('ws://adminetwork.duckdns.org');
     wsocket.onopen = function (event) {
         onOpen(event)
     }; wsocket.onclose = function (event) {
@@ -15,9 +15,8 @@ function openConnection() {
 }
 
 function onMessage(msgc){
-
-           msgdata = JSON.parse(msgc.data)
-           console.log()
+           message = JSON.parse(msgc.data)
+           console.log(message)
 }
 function onOpen() {
     console.log("THIS HSHIT HAS WORKED UWU")
