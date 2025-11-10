@@ -32,6 +32,7 @@
 
 
 
+
 $(document).ready(function () {   
     t='&emsp;&emsp;'
     d='⇒&emsp;'
@@ -42,10 +43,11 @@ $(document).ready(function () {
                 setTimeout(() => {   
                     if (barArray[i] == t) barArray[i] = d
                      else if (barArray[i] == d) barArray[i] = t
-                    $('#progress-bar').html(barArray.toString().replaceAll(",", "&nbsp;"))
+                    $('#progress-bar').html(barArray.join(' '))
                 }, i*150) }
                 }, 650)
 });               
+
 
 
 
