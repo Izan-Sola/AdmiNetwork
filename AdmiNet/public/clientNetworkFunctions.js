@@ -1,4 +1,5 @@
 
+
 let selectedNetworkCIDR = 0;
 let allHostsToPing = [];
 //Consolas, 'Courier New', monospace
@@ -306,7 +307,6 @@ function removeNetwork() {
                     body: JSON.stringify({ selectedNetworkCIDR })
         })
     }
- 
 }
 
 $(document).ready(function () {   

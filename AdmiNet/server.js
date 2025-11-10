@@ -55,7 +55,7 @@ const webSocketServer = new WebSocketServer({
 })
 
 webSocketServer.on("request", function (req) {
-    if (req.origin === 'http://adminetwork.duckdns.org') {
+    if (req.origin === 'http://localhost') {
         const connection = req.accept(null, req.origin)
         connection.on("close", function () {
                     console.log("Server closed")
@@ -97,14 +97,14 @@ async function getNetworksInfo(options = {}) {
     const scanPromises = [] 
 
     for (const interfaceName in interfaces) {
+        
         for (const iface of interfaces[interfaceName]) {
             if (iface.family === 'IPv4' && !iface.internal) {
                 const subnet = ip.subnet(iface.address, iface.netmask)
                 const interfaceCIDR = `${subnet.networkAddress}/${subnet.subnetMaskLength}`
 
                 if (targetCIDR) {
-                    const [targetHostIP] = targetCIDR.split('/')
-               
+                    const [targetHostIP] = targetCIDR.split('/')           
                     if (iface.address === targetHostIP) {
                         const networkSubnet = ip.cidrSubnet(targetCIDR)
                         const networkCIDR = `${networkSubnet.networkAddress}/${targetCIDR.split('/')[1]}`

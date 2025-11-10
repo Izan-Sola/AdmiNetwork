@@ -385,13 +385,27 @@ aside>.networks>.network-item:hover {
     opacity: 0;
   }
 }
+#scan-in-progress {
+  position: absolute;
+  background-color: #1c2f4d;
+  width: 600px;
+  height: 300px;
+  border-radius: 15px;
+  border: solid 5px black;
+  z-index: 0;
 
+  p {
+    font-size: 24px;
+    text-align: center;
+    font-weight: bolder;
+  }
+}
 #wait-for-scan {
     position: absolute;
     padding: 50px;
-    left: 40%;
-    top: 40%;
-    background-color: rgba(102, 210, 230, 0.658);
+    left: 7%;
+    top: 30%;
+    background-color: rgba(102, 210, 230, 0.758);
     border-radius: 25%;
     border: solid 4px black;
     width: 400px;

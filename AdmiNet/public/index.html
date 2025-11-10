@@ -8,7 +8,8 @@
   <script src="libs/require.js"></script>
   <script src="libs/jquery-3.7.1.js"></script>
   <script src="clientNetworkFunctions.js"></script>
-
+  <script src="clientWebSocket.js"></script>
+>
 </head>
 <body>
   <div class="app">
@@ -64,12 +65,17 @@
       </section>
     </main>
   <div id="cover" class="hidden"></div>  
+
+  <div id="scan-in-progress">
+        <p> Scanning all network interfaces.. </p>
     <div id="wait-for-scan" class="">
+    
         <div id="wait-animation">
         <span id="mail-icon">✉️</span> <span id="progress-bar"></span> <span id="pc-icon">🖥️</span>
         </div>
     </div>
   </div>
+</div>
 
 </body>
 
