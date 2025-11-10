@@ -12,7 +12,7 @@ const ip = require('ip')
 const nmap = require('node-nmap')
 
 const ping = require('ping');
-nmap.nmapLocation = "C:\Program Files (x86)\Nmap\nmap.exe"
+nmap.nmapLocation = "/usr/bin/nmap"
 
 const rateLimit = rateLimiter({
 	windowMs: 2 * 60 * 1000, // 2 minutes
@@ -27,7 +27,7 @@ app.use(rateLimit)
 const pool = mysql.createPool({
     host: "localhost",
     user: "root",
-    password: "1234567890",
+    password: "",
     port: 3306,
     database: "netscan",
     waitForConnections: true,

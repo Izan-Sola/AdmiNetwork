@@ -282,25 +282,45 @@ function getAllNetworksHosts() {
 function removeDeviceCard(card) {
     hostIP = $(card).find('div.ip')[0].textContent
     opt = confirm("Are you sure you want to remove this device card?")
-    $(card).remove()
+
     if (opt) {
         fetch('/removeHost', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ hostIP, selectedNetworkCIDR })
         })
+        $(card).remove()
     }
 }
 //* Remove the selected network
 function removeNetwork() {
     opt = confirm("Are you sure you want to remove this network?")
     cidrDivs = $('.network-item').find('div.sub')
-    for (const div of cidrDivs) {
-        if(div.innerText == selectedNetworkCIDR) $(div).closest('.network-item').remove()
+    if(opt) {
+        for (const div of cidrDivs) {
+                if(div.innerText == selectedNetworkCIDR) $(div).closest('.network-item').remove()
+            }
+            fetch('/removeNetwork', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ selectedNetworkCIDR })
+        })
     }
-    fetch('/removeNetwork', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ selectedNetworkCIDR })
-    })
+ 
 }
+
+$(document).ready(function () {   
+    t='&emsp;&emsp;'
+    d='⇒&emsp;'
+    l=5
+    barArray = Array(l).fill(t);
+    setInterval(() => {
+            for(let i=0; i<l; i++) {
+                setTimeout(() => {   
+                    if (barArray[i] == t) barArray[i] = d
+                    else if (barArray[i] == d) barArray[i] = t
+                    $('#progress-bar').html(barArray.join(' '))
+                }, i*125) }
+                }, 400)
+});               
+
