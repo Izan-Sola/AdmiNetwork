@@ -278,10 +278,9 @@ function getAllNetworksHosts() {
         })
 }
 
-//* Remove the selected host card and from the database
+//* Remove the selected host
 function removeDeviceCard(card) {
     hostIP = $(card).find('div.ip')[0].textContent
-    console.log(hostIP)
     opt = confirm("Are you sure you want to remove this device card?")
     $(card).remove()
     if (opt) {
@@ -291,7 +290,17 @@ function removeDeviceCard(card) {
                 body: JSON.stringify({ hostIP, selectedNetworkCIDR })
         })
     }
-
-
-
+}
+//* Remove the selected network
+function removeNetwork() {
+    opt = confirm("Are you sure you want to remove this network?")
+    cidrDivs = $('.network-item').find('div.sub')
+    for (const div of cidrDivs) {
+        if(div.innerText == selectedNetworkCIDR) $(div).closest('.network-item').remove()
+    }
+    fetch('/removeNetwork', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ selectedNetworkCIDR })
+    })
 }

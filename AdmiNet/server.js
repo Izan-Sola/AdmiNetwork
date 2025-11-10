@@ -409,6 +409,21 @@ app.post('/removeHost', async (req, res) => {
         res.sendStatus(200)
         con.release() }
 }) 
+
+//* Remove a network from the databse
+
+app.post('/removeNetwork', async (req, res) => {
+    const con = await getDatabaseConnection()
+    const networkCIDR = convertIPtoTableName(req.body.selectedNetworkCIDR)
+   // console.log(network)
+    try {
+        con.query(`DROP TABLE IF EXISTS ${networkCIDR}`) 
+    } catch (error) {
+        console.log("Error deleting the network", error, networkCIDR)
+    } finally { 
+        res.sendStatus(200)
+        con.release() }
+}) 
 //? <------ UTILITY FUNCTIONS ------>
 
 //* Connect to database (Now returns a connection from the pool)
