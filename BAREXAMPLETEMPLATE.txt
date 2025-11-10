@@ -31,20 +31,21 @@
 
 
 
+
 $(document).ready(function () {   
     t='&emsp;&emsp;'
     d='⇒&emsp;'
-    barArray = Array(6).fill(t);
+    l=6
+    barArray = Array(l).fill(t);
     setInterval(() => {
-            for(let i=0; i<6; i++) {
+            for(let i=0; i<l; i++) {
                 setTimeout(() => {   
-                    $.each(barArray, function (index, value) { 
-                        if (index == i && value == t) barArray.splice(index, 1, d)
-                        else if (index == i && value == d) barArray.splice(index, 1, t)
-                    });
+                    if (barArray[i] == t) barArray[i] = d
+                     else if (barArray[i] == d) barArray[i] = t
                     $('#progress-bar').html(barArray.toString().replaceAll(",", "&nbsp;"))
                 }, i*150) }
                 }, 650)
 });               
+
 
 
