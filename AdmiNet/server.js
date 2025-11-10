@@ -12,7 +12,7 @@ const ip = require('ip')
 const nmap = require('node-nmap')
 
 const ping = require('ping');
-nmap.nmapLocation = "/usr/bin/nmap"
+nmap.nmapLocation = "C:\Program Files (x86)\Nmap\nmap.exe"
 
 const rateLimit = rateLimiter({
 	windowMs: 2 * 60 * 1000, // 2 minutes
@@ -272,8 +272,8 @@ async function updateHostStatus(result) {
         const hostIP = result.ip
         const tableName = convertIPtoTableName(result.network_ip)
        
-        console.log(tableName)
-        const updateStatus = `UPDATE ${tableName} SET isAlive = ?, last_ping = ? WHERE host_ip = ?`
+       // console.log(tableName)
+        const updateStatus = `UPDATE IGNORE ${tableName} SET isAlive = ?, last_ping = ? WHERE host_ip = ?`
         await con.query(updateStatus, [ isAlive, now, hostIP ])
     }
     catch (e) {
@@ -414,12 +414,14 @@ app.post('/removeHost', async (req, res) => {
 
 app.post('/removeNetwork', async (req, res) => {
     const con = await getDatabaseConnection()
-    const networkCIDR = convertIPtoTableName(req.body.selectedNetworkCIDR)
-   // console.log(network)
+    const tableName = convertIPtoTableName(req.body.selectedNetworkCIDR)
+    console.log(tableName)
     try {
-        con.query(`DROP TABLE IF EXISTS ${networkCIDR}`) 
+        await con.query(`DROP TABLE IF EXISTS ${tableName}`)
+        removeNetworkData = `DELETE FROM networks_data WHERE cidr = ?`
+        await con.query(removeNetworkData, [req.body.selectedNetworkCIDR])
     } catch (error) {
-        console.log("Error deleting the network", error, networkCIDR)
+        console.log("Error deleting the network", error, tableName)
     } finally { 
         res.sendStatus(200)
         con.release() }
