@@ -30,6 +30,7 @@
 <<< JAVASCRIPT >>>
 
 
+
 $(document).ready(function () {   
     t='&emsp;&emsp;'
     d='⇒&emsp;'
@@ -41,9 +42,9 @@ $(document).ready(function () {
                         if (index == i && value == t) barArray.splice(index, 1, d)
                         else if (index == i && value == d) barArray.splice(index, 1, t)
                     });
-                    bar = barArray.toString().replaceAll(",", "&nbsp;")
-                    $('#progress-bar').html(bar)
-                }, i*150)
-            }
-    }, 650)
+                    $('#progress-bar').html(barArray.toString().replaceAll(",", "&nbsp;"))
+                }, i*150) }
+                }, 650)
 });               
+
+
