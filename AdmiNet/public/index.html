@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -9,11 +10,12 @@
   <script src="libs/jquery-3.7.1.js"></script>
   <script src="clientNetworkFunctions.js"></script>
   <script src="clientWebSocket.js"></script>
->
+  >
 </head>
+
 <body>
   <div class="app">
-    
+
     <aside class="sidebar" aria-label="Redes disponibles">
 
       <div class="brand">
@@ -28,18 +30,19 @@
         <label for="scan-network">Scan a network</label>
         <div class="row">
           <input id="scan-network" type="text" placeholder="HOST IP" />
-          <input id="scan-mask" type="text" placeholder="Mask (e.g: 24, 16, 18)"/>
+          <input id="scan-mask" type="text" placeholder="Mask (e.g: 24, 16, 18)" />
         </div>
         <div style="display:flex;justify-content:space-between;gap:8px">
           <button class="btn" type="button" onclick="networkScan()">Scan Network</button>
           <button class="btn" type="button" onclick="scanAllNetworks()">Auto-Scan</button>
-          <button class="btn btn-ghost" type="button" style="background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.03)">Import</button>
+          <button class="btn btn-ghost" type="button"
+            style="background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.03)">Import</button>
         </div>
       </div>
 
       <div style="font-size:13px;color:var(--muted);margin-top:6px">Available networks</div>
       <div class="networks" role="list">
-        <!-- <div class="footer">Logged as <strong>admin</strong></div> -->     
+        <!-- <div class="footer">Logged as <strong>admin</strong></div> -->
     </aside>
 
     <main class="main" role="main">
@@ -64,18 +67,23 @@
         </div>
       </section>
     </main>
-  <div id="cover" class="hidden"></div>  
+    <div id="cover" class="hidden"></div>
 
-  <div id="scan-in-progress" class="hidden">
-        <p> Scanning all network interfaces.. </p>
-    <div id="wait-for-scan" class="">
-    
+    <div id="scan-in-progress">
+      <p id="scan-msg">Scanning all network interfaces...</p>
+      <p id="scan-interfaces"></p>
+      <div id="wait-for-scan">
+        <p id="scan-host">Retrieving host data...</p>
         <div id="wait-animation">
-        <span id="mail-icon">✉️</span> <span id="progress-bar"></span> <span id="pc-icon">🖥️</span>
+          <span id="mail-icon">✉️</span>
+          <span id="progress-bar"></span>
+          <span id="pc-icon">🖥️</span>
         </div>
+      </div>
+      <p id="scan-completed"></p>
     </div>
+    
   </div>
-</div>
 
 </body>
 

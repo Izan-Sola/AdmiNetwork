@@ -1,7 +1,7 @@
 
 
 function openConnection() {
-   wsocket = new WebSocket('ws://adminetwork.duckdns.org');
+   wsocket = new WebSocket('ws://localhost:3001');
     wsocket.onopen = function (event) {
         onOpen(event)
     }; wsocket.onclose = function (event) {
@@ -15,11 +15,20 @@ function openConnection() {
 }
 
 function onMessage(msgc){
-           message = JSON.parse(msgc.data)
-           console.log(message)
+        message = JSON.parse(msgc.data)
+        console.log(message.network)
+        
+    switch (message.type) {
+        case 'scanComplete':  
+            $('#scan-completed').html('Completed scan for: '+message.network)
+        break;
+        case 'foundNetwork':    
+                $('#scan-interfaces').append('<b>'+message.network+'&nbsp;|&nbsp;</b>')
+        break;
+    }
 }
 function onOpen() {
-    console.log("THIS HSHIT HAS WORKED UWU")
+    console.log("This worked")
 }
 function onClose(reason) {
     console.log('Connection closed' + reason)
@@ -31,8 +40,9 @@ function onError(error) {
 }
 
 function doSend(msg, type, user) {
-    const message = JSON.stringify({ msg: msg, type: type, user: user });
+    const message = JSON.stringify({ msg: msg, type: type });
     wsocket.send(message);
+
 }
 
 window.addEventListener('load', function () {

@@ -310,9 +310,9 @@ function removeNetwork() {
 }
 
 $(document).ready(function () {   
-    t='&emsp;&emsp;'
+    t='&emsp;&emsp;&emsp;'
     d='⇒&emsp;'
-    l=5
+    l=4
     barArray = Array(l).fill(t);
     setInterval(() => {
             for(let i=0; i<l; i++) {
@@ -320,7 +320,8 @@ $(document).ready(function () {
                     if (barArray[i] == t) barArray[i] = d
                     else if (barArray[i] == d) barArray[i] = t
                     $('#progress-bar').html(barArray.join(' '))
-                }, i*125) }
-                }, 400)
+                }, i*180) }
+        
+    }, 560)
 });               
 

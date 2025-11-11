@@ -12,7 +12,7 @@ const ip = require('ip')
 const nmap = require('node-nmap')
 
 const ping = require('ping');
-nmap.nmapLocation = "/usr/bin/nmap"
+nmap.nmapLocation = "C:/Program Files (x86)/Nmap/nmap.exe"
 let clientConn = null;
 const rateLimit = rateLimiter({
 	windowMs: 2 * 60 * 1000, // 2 minutes
@@ -55,7 +55,7 @@ const webSocketServer = new WebSocketServer({
 })
 
 webSocketServer.on("request", function (req) {
-    if (req.origin === 'http://localhost' || req.origin === 'http://adminetwork.duckdns.org') {
+    if (req.origin === 'http://localhost:3001') {
     const connection = req.accept(null, req.origin)
         connection.on("close", function () {
                     console.log("Server closed")
@@ -104,7 +104,7 @@ async function getNetworksInfo(options = {}) {
             if (iface.family === 'IPv4' && !iface.internal) {
                 const subnet = ip.subnet(iface.address, iface.netmask)
                 const interfaceCIDR = `${subnet.networkAddress}/${subnet.subnetMaskLength}`
-                clientConn.sendUTF(JSON.stringify({ interface: interfaceCIDR }))
+                clientConn.sendUTF(JSON.stringify({ network: interfaceCIDR, type: 'foundNetwork', msg: "" }))
                 if (targetCIDR) {
                     const [targetHostIP] = targetCIDR.split('/')           
                     if (iface.address === targetHostIP) {
@@ -183,6 +183,7 @@ function retrieveHostInfo(subnet) {
         const scan = new nmap.NmapScan(subnet, "-O")
         
         scan.once('complete', (data) => {
+            clientConn.sendUTF(JSON.stringify({ type: 'scanComplete', msg: '', network: subnet}))
             console.log(`NMAP found ${data.length} hosts in ${subnet}. Starting concurrent saves...`)
             
 
