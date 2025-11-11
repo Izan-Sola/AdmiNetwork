@@ -75,11 +75,9 @@ function appendHostsAndNetworks(hosts, networks) {
     }
     // console.log(networks[0])
     if (networks != 0) {
-        $('.networks').empty();
+        
         networks.forEach(network => {
 
-            // if(!availableNetworks.includes(network.cidr)) {
-            $('.cards').empty();
             const networkCard = $(`<div class="network-item" role="listitem"">
                             <div class="left">
                                 <div class="dot" style="background:linear-gradient(180deg,#60a5fa,#3b82f6)"></div>
@@ -133,6 +131,9 @@ function searchCoincidences(searchText) {
 
 //* Scan all the available network interfaces
 function scanAllNetworks() {
+    $('#cover').removeClass('hidden')
+    $('#scan-in-progress').removeClass('hidden')
+    $('#scan-interfaces').html('')
     fetch('/getAllNetworks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -141,7 +142,7 @@ function scanAllNetworks() {
         .then(res => res.json())
         .then(data => {
             //   console.log(data.networks)
-
+            $('.networks').empty();
             data.networks.forEach(network => {
                 fetch('/loadNetworkData', {
                     method: 'POST',
@@ -151,6 +152,8 @@ function scanAllNetworks() {
                     .then(res => res.json())
                     .then(data => {
                         appendHostsAndNetworks(0, [network])
+                        $('#cover').addClass('hidden')
+                        $('#scan-in-progress').addClass('hidden')
                     })
             })
 

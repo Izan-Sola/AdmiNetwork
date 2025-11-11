@@ -450,18 +450,21 @@ aside>.networks>.network-item:hover {
 
   #scan-interfaces {
     font-size: 15px;
+    font-weight: 200 !important ;
     color: #c8e4ff;
   }
 
   #scan-completed {
     font-size: 14px;
-    margin-top: 25%;
+    margin-top: 35%;
     color: #9be07e;
     text-shadow: 0 0 5px rgba(155, 224, 126, 0.5);
+    z-index: 10;
   }
 }
 
 #wait-for-scan {
+  z-index: 9;
   position: absolute;
   left: 50%;
   top: 58%;

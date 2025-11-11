@@ -16,11 +16,10 @@ nmap.nmapLocation = "C:/Program Files (x86)/Nmap/nmap.exe"
 let clientConn = null;
 const rateLimit = rateLimiter({
 	windowMs: 2 * 60 * 1000, // 2 minutes
-	limit: 1000, // Limit each IP to 1000 requests per `window` (here, per 15 minutes).
+	limit: 1000, // Limit each IP to 1000 requests per `window` (here, per 2 minutes).
 	standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
 	legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
-	ipv6Subnet: 56, // Set to 60 or 64 to be less aggressive, or 52 or 48 to be more aggressive
-	// store: ... , // Redis, Memcached, etc. 
+	ipv6Subnet: 56, // Set to 60 or 64 to be less aggressive, or 52 or 48 to be more aggressive. 
 })
 app.use(rateLimit)
 
@@ -429,6 +428,10 @@ app.post('/removeNetwork', async (req, res) => {
         res.sendStatus(200)
         con.release() }
 }) 
+
+//? <----- SSH FUNCTIONS ----->
+
+
 //? <------ UTILITY FUNCTIONS ------>
 
 //* Connect to database (Now returns a connection from the pool)
@@ -452,9 +455,9 @@ function getDate() {
 
 //* wait 
 function wait(ms) {
-  return new Promise((resolve) => {
+    return new Promise((resolve) => {
     setTimeout(resolve, ms)
-  })
+})
 }
 //* Convert IP (i.e: 192.168.1.0/24) to 192_168_1_0_24
 function convertIPtoTableName(IP) {
@@ -472,7 +475,7 @@ async function createNetworkTableIfNotExists(tableName, con) {
             host_ip VARCHAR(45) NOT NULL,
             host_name VARCHAR(24) NOT NULL DEFAULT "unknown",
             host_os VARCHAR(24) NOT NULL DEFAULT "unknown",
-            last_ping VARCHAR(32) NOT NULL DEFAULT "0:0:0",
+            last_ping VARCHAR(32) NOT NULL DEFAULT "00:00:00",
             isAlive BOOLEAN DEFAULT FALSE,
             UNIQUE unique_host_ip (host_ip)
         ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
