@@ -8,10 +8,10 @@ Logs information about each host like the last ping, last ssh connection, active
 ## Preview:
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ad294ede-05c7-4843-9855-001a8dd8aabe" />
+<br>
 
 
-
-### TODO: 
+## TODO: 
   - Rename some functions names to be less confusing
   - Column to save ports, protocols and services of each host, display it on details...
   - SSH Connection with keytar to manage ssh keys
