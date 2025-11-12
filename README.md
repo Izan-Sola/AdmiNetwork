@@ -5,3 +5,13 @@ Scan all the available networks and its hosts, servers, virtual machines, retrie
 Connect to any available host with SSH if possible.
 Logs information about each host like the last ping, last ssh connection, active time...
 
+
+
+TODO: 
+  - Rename some functions names to be less confusing
+  - SSH Connection function
+  - Logs for each device and network (Perchance, implement AI so you can ask it to provide you with specific data in the logs)
+  - Implement keytar to manage ssh keys
+  - Implement Electron for the desktop app version
+  - Users, permissions...
+  - Probably more stuff that I cant think about of the top of my head rn...
