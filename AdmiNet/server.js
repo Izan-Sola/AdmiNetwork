@@ -291,7 +291,7 @@ async function saveHostsInfo(network, hostData) {
 
     const tableName = convertIPtoTableName(network)
     const con = await getDatabaseConnection() // Use pool
-    
+    console.log(hostData)
     try {
         await createNetworkTableIfNotExists(tableName, con) 
 

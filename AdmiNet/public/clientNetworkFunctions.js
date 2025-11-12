@@ -64,18 +64,30 @@ function appendHostsAndNetworks(hosts, networks) {
                             <div class="card-actions">
                                 <button class="btn-ghost" onclick="editDeviceCardInfo(this.closest('.device-card'))">Edit</button>
                                 <button class="btn">Connect</button>
+                                <button class="btn-ghost details-btn">Details</button>
                                 <button class="btn-ghost" onclick="removeDeviceCard(this.closest('.device-card'))"> 🗑️ </button>
                             </div>
+                        </div>
+
+                        <div class="device-details">
+                            <h4>Open Ports & Services</h4>
+                            <div class="detail-row"><strong>22/tcp:</strong> SSH</div>
+                            <div class="detail-row"><strong>80/tcp:</strong> HTTP</div>
+                            <div class="detail-row"><strong>443/tcp:</strong> HTTPS</div>
                         </div>
                     </div>
                 </article>
             `);
+            card.find(".details-btn").on("click", function () {
+                const cardEl = $(this).closest(".device-card");
+                cardEl.toggleClass("expanded");
+            });
             $('.cards').append(card);
         });
     }
     // console.log(networks[0])
     if (networks != 0) {
-        
+
         networks.forEach(network => {
 
             const networkCard = $(`<div class="network-item" role="listitem"">
@@ -113,7 +125,7 @@ $(document).ready(function () {
     getAllNetworksHosts()
 
     pingInterval = setInterval(pingAllHosts, 10000)
-    
+
 });
 
 //* Search bar function. Searches for coincidences on the ip and the name, hiding the respective cards when there is no match.
@@ -237,9 +249,9 @@ function updateHostStatus(status) {
         for (let y = 0; y <= status.length - 1; y++) {
             if (status[y].ip == currentIpDiv.html()) {
                 currentStatusDiv.removeClass();
-                (status[y].status == 'down') 
-                ? (currentStatusDiv.addClass('status down'), currentStatusDiv.html("🔴 DOWN")) 
-                : (currentStatusDiv.addClass('status up'),  currentStatusDiv.html("🟢 UP"));
+                (status[y].status == 'down')
+                    ? (currentStatusDiv.addClass('status down'), currentStatusDiv.html("🔴 DOWN"))
+                    : (currentStatusDiv.addClass('status up'), currentStatusDiv.html("🟢 UP"));
                 break;
             }
         }
@@ -289,9 +301,9 @@ function removeDeviceCard(card) {
 
     if (opt) {
         fetch('/removeHost', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ hostIP, selectedNetworkCIDR })
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hostIP, selectedNetworkCIDR })
         })
         $(card).remove()
     }
@@ -300,31 +312,32 @@ function removeDeviceCard(card) {
 function removeNetwork() {
     opt = confirm("Are you sure you want to remove this network?")
     cidrDivs = $('.network-item').find('div.sub')
-    if(opt) {
+    if (opt) {
         for (const div of cidrDivs) {
-                if(div.innerText == selectedNetworkCIDR) $(div).closest('.network-item').remove()
-            }
-            fetch('/removeNetwork', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ selectedNetworkCIDR })
+            if (div.innerText == selectedNetworkCIDR) $(div).closest('.network-item').remove()
+        }
+        fetch('/removeNetwork', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ selectedNetworkCIDR })
         })
     }
 }
 
-$(document).ready(function () {   
-    t='&emsp;&emsp;&emsp;'
-    d='⇒&emsp;'
-    l=4
+$(document).ready(function () {
+    t = '&emsp;&emsp;&emsp;'
+    d = '⇒&emsp;'
+    l = 4
     barArray = Array(l).fill(t);
     setInterval(() => {
-            for(let i=0; i<l; i++) {
-                setTimeout(() => {   
-                    if (barArray[i] == t) barArray[i] = d
-                    else if (barArray[i] == d) barArray[i] = t
-                    $('#progress-bar').html(barArray.join(' '))
-                }, i*180) }
-        
+        for (let i = 0; i < l; i++) {
+            setTimeout(() => {
+                if (barArray[i] == t) barArray[i] = d
+                else if (barArray[i] == d) barArray[i] = t
+                $('#progress-bar').html(barArray.join(' '))
+            }, i * 180)
+        }
+
     }, 560)
-});               
+});
 

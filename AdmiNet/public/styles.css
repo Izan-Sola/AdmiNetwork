@@ -543,3 +543,41 @@ aside>.networks>.network-item:hover {
   background-color: rgba(24, 24, 39, 0.575);
   z-index: -0;
 }
+
+.device-card {
+  position: relative;
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.device-details {
+  display: none;
+  flex-direction: column;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 13px;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.device-details h4 {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 14px;
+}
+.device-card.expanded {
+  flex: 0 1 calc(66.66% - 14px); 
+  transform: scale(1.01);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+  transition: all 0.3s ease;
+  min-height: 280px; 
+}
+
+.device-card.expanded .device-details {
+  display: flex;
+  opacity: 1;
+}
