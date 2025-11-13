@@ -41,26 +41,23 @@ function appendHostsAndNetworks(hosts, networks) {
 
         $('.stats strong')[1].innerText = hosts.length
         hosts.forEach(host => {
-
-            //    console.log(host.host_ip)
-            // currentStatusDiv.html("🔴 DOWN")) 
-            //     : (currentStatusDiv.addClass('status up'),  currentStatusDiv.html("🟢 UP"));
-
             const card = $(`
                 <article class="device-card" role="article" tabindex="0">
                     <div class="device-avatar">${host.host_ip.split('.').pop()}</div>
-    
+            
                     <div class="device-content">
                         <div class="top-row">
                             <input type="text" class="name" value="${host.host_name || "Unknown name"}" disabled>
                             <div class="ip">${host.host_ip}</div>
                         </div>
-    
+            
                         <input type="text" class="os" value="${host.host_os}" disabled>
-                        <div class="ping">Last ping: &nbsp;<strong> ${host.last_ping}</strong></div>
-    
+                        <div class="ping">Last ping: &nbsp;<strong>${host.last_ping}</strong></div>
+            
                         <div class="bottom-row">
-                            <div class="${(host.isAlive == 1) ? "status up" : "status down"}">${(host.isAlive == 1) ? "🟢 UP" : "🔴 DOWN"}</div>
+                            <div class="${(host.isAlive == 1) ? "status up" : "status down"}">
+                                ${(host.isAlive == 1) ? "🟢 UP" : "🔴 DOWN"}
+                            </div>
                             <div class="card-actions">
                                 <button class="btn-ghost" onclick="editDeviceCardInfo(this.closest('.device-card'))">Edit</button>
                                 <button class="btn">Connect</button>
@@ -68,21 +65,28 @@ function appendHostsAndNetworks(hosts, networks) {
                                 <button class="btn-ghost" onclick="removeDeviceCard(this.closest('.device-card'))"> 🗑️ </button>
                             </div>
                         </div>
-
+                        <h4 class="ports-services">Open Ports & Services</h4>  
                         <div class="device-details">
-                            <h4>Open Ports & Services</h4>
-                            <div class="detail-row"><strong>22/tcp:</strong> SSH</div>
-                            <div class="detail-row"><strong>80/tcp:</strong> HTTP</div>
-                            <div class="detail-row"><strong>443/tcp:</strong> HTTPS</div>
                         </div>
                     </div>
                 </article>
             `);
+            
             card.find(".details-btn").on("click", function () {
                 const cardEl = $(this).closest(".device-card");
                 cardEl.toggleClass("expanded");
             });
             $('.cards').append(card);
+            if (host.openPorts !== null) {
+                openPorts = JSON.parse(host.openPorts)
+                if (openPorts != null) {
+                    openPorts.forEach(port => {
+                        $(card).find('.device-details').append(`
+                            <div class="port"><strong>${port.protocol}/${port.port}:</strong> ${port.service}</div>
+                        `)
+                    })
+                }
+            }     
         });
     }
     // console.log(networks[0])
@@ -337,7 +341,6 @@ $(document).ready(function () {
                 $('#progress-bar').html(barArray.join(' '))
             }, i * 180)
         }
-
     }, 560)
 });
 

@@ -295,12 +295,14 @@ async function saveHostsInfo(network, hostData) {
     try {
         await createNetworkTableIfNotExists(tableName, con) 
 
-        const insertHost = `INSERT IGNORE INTO ${tableName} SET network_ip = ?, host_ip = ?, host_name = ?, host_os = ?`
+        const insertHost = `INSERT IGNORE INTO ${tableName} SET network_ip = ?,
+                            host_ip = ?, host_name = ?, host_os = ?, openPorts = ?`
         await con.query(insertHost, [
             network, 
             hostData.ip, 
             hostData.hostname,
-            hostData.osNmap
+            hostData.osNmap,
+            JSON.stringify(hostData.openPorts)
         ])
 
         return { message: 'Host saved successfully', host: hostData.ip }
@@ -477,6 +479,7 @@ async function createNetworkTableIfNotExists(tableName, con) {
             host_os VARCHAR(24) NOT NULL DEFAULT "unknown",
             last_ping VARCHAR(32) NOT NULL DEFAULT "00:00:00",
             isAlive BOOLEAN DEFAULT FALSE,
+            openPorts VARCHAR(2048) DEFAULT "none",
             UNIQUE unique_host_ip (host_ip)
         ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
         `

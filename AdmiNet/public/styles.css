@@ -21,11 +21,11 @@ html, body {
 
 .app {
   display: flex;
-  height: 100vh; /* ensure full height */
+  height: 100vh;
   gap: 18px;
   padding: 20px;
   box-sizing: border-box;
-  overflow: hidden; /* prevent body scroll */
+  overflow: hidden;
 }
 
 /* --- Sidebar --- */
@@ -40,7 +40,6 @@ html, body {
   gap: 12px;
 }
 
-/* (sidebar rules unchanged) */
 .brand {
   display: flex;
   gap: 12px;
@@ -167,7 +166,7 @@ aside>.networks>.network-item:hover {
   flex-direction: column;
   gap: 14px;
   height: 100%;
-  min-height: 0; /* allow inner flex to scroll */
+  min-height: 0;
 }
 
 .topbar {
@@ -205,7 +204,7 @@ aside>.networks>.network-item:hover {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* keep only cards scrollable */
+  overflow: hidden;
   min-height: 0;
 }
 
@@ -223,8 +222,9 @@ aside>.networks>.network-item:hover {
   min-height: 0;
 }
 
-
+/* --- Device Cards --- */
 .device-card {
+  position: relative;
   flex: 0 1 calc(33.333% - 14px);
   display: flex;
   align-items: flex-start;
@@ -232,27 +232,28 @@ aside>.networks>.network-item:hover {
   padding: 16px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   min-width: 280px;
   box-sizing: border-box;
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-  overflow-x: scroll;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
+  z-index: 1;
 }
-.device-card::-webkit-scrollbar {
-  height: 6px; /* horizontal scrollbar height */
-  color: red;
-  scroll-behavior: auto;
-  scroll-snap-type: mandatory;
-}
-
 
 .device-card:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* (rest unchanged) */
+/* Keep same width, just expand internal content */
+.device-card.expanded {
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.45);
+  z-index: 2;
+}
+
+/* --- Device Content --- */
 .device-avatar {
   width: 60px;
   height: 60px;
@@ -348,6 +349,48 @@ aside>.networks>.network-item:hover {
   cursor: pointer;
 }
 
+/* --- Expanded Details --- */
+.ports-services {
+  margin: 12px 0 6px;
+  color: var(--accent);
+  font-size: 14px;
+  display: none;
+}
+
+.device-card.expanded .ports-services {
+  display: block;
+}
+
+.device-details {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 13px;
+  color: var(--muted);
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.3s ease, max-height 0.4s ease;
+}
+
+.device-details .port {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 10px;
+  border-radius: 6px;
+  min-width: 100px;
+  text-align: center;
+}
+
+.device-card.expanded .device-details {
+  opacity: 1;
+  max-height: 500px;
+}
+
+/* --- Misc --- */
 .hidden {
   display: none;
 }
@@ -385,40 +428,8 @@ aside>.networks>.network-item:hover {
     opacity: 0;
   }
 }
-#scan-in-progress {
-  position: absolute;
-  left: 36%;
-  top: 30%;
-  background-color: #1c2f4d;
-  width: 600px;
-  height: 300px;
-  border-radius: 15px;
-  border: solid 5px black;
-  z-index: 0;
 
-  p {
-    text-align: center;
-    font-weight: bolder;
-  }
-  #scan-msg {
-    font-size: 24px;
-  }
-  #scan-interfaces {
-    font-size: 16px;
-  }
-}
-#wait-for-scan {
-    position: absolute;
-    padding: 50px;
-    left: 7%;
-    top: 40%;
-    background-color: rgba(102, 210, 230, 0.758);
-    border-radius: 25%;
-    border: solid 4px black;
-    width: 400px;
-    height: 30px;
-    z-index: 2;
-}
+/* --- Scan Popup Styles --- */
 #scan-in-progress {
   position: absolute;
   left: 50%;
@@ -434,33 +445,33 @@ aside>.networks>.network-item:hover {
   z-index: 100;
   padding-top: 10px;
   animation: fadeIn 0.6s ease-out;
+}
 
-  p {
-    text-align: center;
-    font-weight: 600;
-    margin: 8px 0;
-  }
+#scan-in-progress p {
+  text-align: center;
+  font-weight: 600;
+  margin: 8px 0;
+}
 
-  #scan-msg {
-    font-size: 22px;
-    letter-spacing: 1px;
-    color: #79b8ff;
-    text-shadow: 0 0 10px rgba(121, 184, 255, 0.5);
-  }
+#scan-msg {
+  font-size: 22px;
+  letter-spacing: 1px;
+  color: #79b8ff;
+  text-shadow: 0 0 10px rgba(121, 184, 255, 0.5);
+}
 
-  #scan-interfaces {
-    font-size: 15px;
-    font-weight: 200 !important ;
-    color: #c8e4ff;
-  }
+#scan-interfaces {
+  font-size: 15px;
+  font-weight: 200 !important;
+  color: #c8e4ff;
+}
 
-  #scan-completed {
-    font-size: 14px;
-    margin-top: 35%;
-    color: #9be07e;
-    text-shadow: 0 0 5px rgba(155, 224, 126, 0.5);
-    z-index: 10;
-  }
+#scan-completed {
+  font-size: 14px;
+  margin-top: 35%;
+  color: #9be07e;
+  text-shadow: 0 0 5px rgba(155, 224, 126, 0.5);
+  z-index: 10;
 }
 
 #wait-for-scan {
@@ -524,60 +535,10 @@ aside>.networks>.network-item:hover {
   z-index: -1;
 }
 
-/* #progress-bar::before {
-  content: "";
-  position: absolute;
-  left: -40%;
-  top: 0;
-  width: 40%;
-  height: 100%;
-  background: linear-gradient(90deg, #66d2e6, #007bff);
-  border-radius: 5px;
-  animation: progressMove 2s li
-} */
-
 #cover {
   position: absolute;
   width: 100vw;
   height: 100vh;
   background-color: rgba(24, 24, 39, 0.575);
-  z-index: -0;
-}
-
-.device-card {
-  position: relative;
-  transition: all 0.3s ease;
-  cursor: default;
-}
-
-.device-details {
-  display: none;
-  flex-direction: column;
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  font-size: 13px;
-  color: var(--muted);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.device-details h4 {
-  margin: 0 0 8px;
-  color: var(--accent);
-  font-size: 14px;
-}
-.device-card.expanded {
-  flex: 0 1 calc(66.66% - 14px); 
-  transform: scale(1.01);
-  background: rgba(255, 255, 255, 0.07);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-  z-index: 2;
-  transition: all 0.3s ease;
-  min-height: 280px; 
-}
-
-.device-card.expanded .device-details {
-  display: flex;
-  opacity: 1;
+  z-index: 0;
 }
