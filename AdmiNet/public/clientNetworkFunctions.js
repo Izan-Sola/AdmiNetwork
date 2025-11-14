@@ -264,29 +264,28 @@ function saveDeviceCardInfo() {
 
 //* Update the cards' status and last ping divs
 function updateHostStatus(status) {
+    console.log(status)
     ipDivs = $('.cards').find('div.ip');
     statusDivs = $('.cards').find('div.status');
-
+    lastPingDivs = $('.cards').find('div.ping').children()
     for (let i = 0; i <= ipDivs.length - 1; i++) {
         let currentIpDiv = ipDivs.eq(i);
         let currentStatusDiv = statusDivs.eq(i);
-
         for (let y = 0; y <= status.length - 1; y++) {
             if (status[y].ip == currentIpDiv.html()) {
                 currentStatusDiv.removeClass();
+               // console.log(status[y].time)
                 (status[y].status == 'down')
                     ? (currentStatusDiv.addClass('status down'), currentStatusDiv.html("🔴 DOWN"))
                     : (currentStatusDiv.addClass('status up'), currentStatusDiv.html("🟢 UP"));
+                lastPingDivs.eq(i).text(`${status[y].date} - ${status[y].time} ms`)
                 break;
             }
         }
     }
 }
-//* For later: Pings every host from every network to check connectivity
+//* Pings every host from every network to check connectivity
 function pingAllHosts() {
-    // ipDivs = $('.cards').find('div.ip')
-    // ipList =  Array.from(ipDivs, (div) => div.innerHTML)
-    // console.log(ipList)
     fetch('/pingAllHosts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -294,7 +293,7 @@ function pingAllHosts() {
     })
         .then(res => res.json())
         .then(data => {
-            console.log(data)
+           // console.log(data)
             updateHostStatus(data.connectivityStatus)
         })
 }

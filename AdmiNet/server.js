@@ -253,7 +253,8 @@ app.post('/pingAllHosts', async (req, res) => {
             ip: res.numeric_host,
             network_ip: networkIP,
             status: res.alive ? 'up' : 'down',
-            time: res.time 
+            time: res.time, 
+            date: getDate()
         };
     });
     for ( const result of connectivityStatus ) {
