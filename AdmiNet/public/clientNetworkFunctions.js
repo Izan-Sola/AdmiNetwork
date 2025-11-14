@@ -2,6 +2,8 @@
 
 let selectedNetworkCIDR = 0;
 let allHostsToPing = [];
+let regExpOS = new RegExp(`(Linux|Windows|Mac|Android)`, "i");
+
 //Consolas, 'Courier New', monospace
 //*Scan the target network
 function networkScan(subnet = 0) {
@@ -40,10 +42,23 @@ function appendHostsAndNetworks(hosts, networks) {
     if (hosts != 0) {
 
         $('.stats strong')[1].innerText = hosts.length
+
         hosts.forEach(host => {
+            matchedOS = regExpOS.exec(host.host_os)
+            console.log(host.host_os)
+            if (matchedOS) {
+
+                switch (matchedOS[1]) {
+                    case 'Linux': iconIMG = "Linux"; break
+                    case 'Windows': iconIMG = "Windows"; break
+                    case 'Android': iconIMG = "Android"; break
+                   // case 'Windows': iconIMG = "Windows"; break
+                }
+            } else { iconIMG = null}
+//if no  icon ip number ${host.host_ip.split('.').pop()}
             const card = $(`
                 <article class="device-card" role="article" tabindex="0">
-                    <div class="device-avatar">${host.host_ip.split('.').pop()}</div>
+                    <div class="device-avatar ${iconIMG}"> ${ (iconIMG) ? '' : host.host_ip.split('.').pop() }</div>
             
                     <div class="device-content">
                         <div class="top-row">
@@ -71,7 +86,7 @@ function appendHostsAndNetworks(hosts, networks) {
                     </div>
                 </article>
             `);
-            
+
             card.find(".details-btn").on("click", function () {
                 const cardEl = $(this).closest(".device-card");
                 cardEl.toggleClass("expanded");
@@ -86,7 +101,9 @@ function appendHostsAndNetworks(hosts, networks) {
                         `)
                     })
                 }
-            }     
+            }
+
+
         });
     }
     // console.log(networks[0])
@@ -114,7 +131,7 @@ function appendHostsAndNetworks(hosts, networks) {
         selectedNetworkCIDR = network
         loadNetwork(network)
     });
-    $(".cards").on("click", ".device-card", function(e) {
+    $(".cards").on("click", ".device-card", function (e) {
         if ($(e.target).closest(".card-actions").length) return;
         $(".device-card").removeClass("selected");
         $(this).addClass("selected");

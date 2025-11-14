@@ -12,7 +12,7 @@ const ip = require('ip')
 const nmap = require('node-nmap')
 
 const ping = require('ping');
-nmap.nmapLocation = "C:/Program Files (x86)/Nmap/nmap.exe"
+nmap.nmapLocation = "/usr/bin/nmap"
 let clientConn = null;
 const rateLimit = rateLimiter({
 	windowMs: 2 * 60 * 1000, // 2 minutes
@@ -54,7 +54,7 @@ const webSocketServer = new WebSocketServer({
 })
 
 webSocketServer.on("request", function (req) {
-    if (req.origin === 'http://localhost:3001') {
+    if (req.origin === 'http://localhost:3001' || req.origin === 'http://adminetwork.duckdns.org') {
     const connection = req.accept(null, req.origin)
         connection.on("close", function () {
                     console.log("Server closed")

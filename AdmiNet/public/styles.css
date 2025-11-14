@@ -621,3 +621,16 @@ h4.ports-services {
 .selected {
   border: 4px white solid;
 }
+
+.Linux {
+  background-image: url('media/LinuxICON.png');
+  background-size: 100%;
+}
+.Windows {
+  background-image: url('media/WindowsICON.png');
+  background-size: 100%;
+}
+.Android {
+  background-image: url('media/AndroidICON.png');
+  background-size: 100%;
+}
