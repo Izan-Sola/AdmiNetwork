@@ -273,8 +273,6 @@ async function updateHostStatus(result) {
         const isAlive = (result.status == 'up') ? true : false
         const hostIP = result.ip
         const tableName = convertIPtoTableName(result.network_ip)
-       
-       // console.log(tableName)
         const updateStatus = `UPDATE IGNORE ${tableName} SET isAlive = ?, last_ping = ? WHERE host_ip = ?`
         await con.query(updateStatus, [ isAlive, now, hostIP ])
     }

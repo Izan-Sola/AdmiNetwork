@@ -60,7 +60,7 @@ function appendHostsAndNetworks(hosts, networks) {
                             </div>
                             <div class="card-actions">
                                 <button class="btn-ghost" onclick="editDeviceCardInfo(this.closest('.device-card'))">Edit</button>
-                                <button class="btn">Connect</button>
+                               
                                 <button class="btn-ghost details-btn">Details</button>
                                 <button class="btn-ghost" onclick="removeDeviceCard(this.closest('.device-card'))"> 🗑️ </button>
                             </div>
@@ -110,10 +110,14 @@ function appendHostsAndNetworks(hosts, networks) {
     }
 
     $('.network-item').on('click', function () {
-
         network = $(this).children().children().children()[1].textContent.trim()
         selectedNetworkCIDR = network
         loadNetwork(network)
+    });
+    $(".cards").on("click", ".device-card", function(e) {
+        if ($(e.target).closest(".card-actions").length) return;
+        $(".device-card").removeClass("selected");
+        $(this).addClass("selected");
     });
 }
 

@@ -595,3 +595,29 @@ aside>.networks>.network-item:hover {
 h4.ports-services {
   margin-bottom: 9px;
 }
+
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background: rgba(10, 17, 30, 0.9);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  backdrop-filter: blur(8px);
+  z-index: 500;
+}
+
+.bottom-bar .btn {
+  padding: 10px 18px;
+  font-size: 15px;
+  border-radius: 10px;
+}
+
+.selected {
+  border: 4px white solid;
+}
