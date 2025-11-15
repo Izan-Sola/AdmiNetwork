@@ -1,12 +1,13 @@
-
-
 let selectedNetworkCIDR = 0;
 let allHostsToPing = [];
+let networkHostsCache = {};
 let regExpOS = new RegExp(`(Linux|Windows|Mac|Android)`, "i");
 
 //Consolas, 'Courier New', monospace
 //*Scan the target network
 function networkScan(subnet = 0) {
+    pausePing();  // ← STOP PINGING DURING SCAN
+
     const IP = $('#scan-network').val();
     const mask = $('#scan-mask').val();
     subnet = (subnet == 0) ? IP + '/' + mask : subnet;
@@ -18,20 +19,28 @@ function networkScan(subnet = 0) {
     })
         .then(res => res.json())
         .then(data => {
-            console.log(data)
-            networks = data.networks
+            const networks = data.networks;
+
             fetch('/loadNetworkData', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ network: networks[0].cidr })
             })
                 .then(res => res.json())
-                .then(data => {
-                    appendHostsAndNetworks(data.networkData, networks)
-                })
+                .then(hostData => {
+                    networkHostsCache[networks[0].cidr] = hostData.networkData;
+                    hostData.networkData.forEach(host => {
+                        allHostsToPing.push({ host_ip: host.host_ip, network_ip: host.network_ip });
+                    });
 
+                    appendHostsAndNetworks(hostData.networkData, networks);
+                    resumePing(); // ← RESUME AFTER FINISHING
+                });
         })
-        .catch(err => console.error(err));
+        .catch(err => {
+            console.error(err);
+            resumePing(); // ← MAKE SURE TO RESUME ON ERROR TOO
+        });
 }
 
 //* Append the hosts' and networks' info
@@ -52,13 +61,12 @@ function appendHostsAndNetworks(hosts, networks) {
                     case 'Linux': iconIMG = "Linux"; break
                     case 'Windows': iconIMG = "Windows"; break
                     case 'Android': iconIMG = "Android"; break
-                   // case 'Windows': iconIMG = "Windows"; break
+                    case 'Mac': iconIMG = "Mac"; break
                 }
-            } else { iconIMG = null}
-//if no  icon ip number ${host.host_ip.split('.').pop()}
+            } else { iconIMG = null }
             const card = $(`
                 <article class="device-card" role="article" tabindex="0">
-                    <div class="device-avatar ${iconIMG}"> ${ (iconIMG) ? '' : host.host_ip.split('.').pop() }</div>
+                    <div class="device-avatar ${iconIMG}"> ${(iconIMG) ? '' : host.host_ip.split('.').pop()}</div>
             
                     <div class="device-content">
                         <div class="top-row">
@@ -168,9 +176,12 @@ function searchCoincidences(searchText) {
 
 //* Scan all the available network interfaces
 function scanAllNetworks() {
+    pausePing();  // ← PAUSE PINGING
+
     $('#cover').removeClass('hidden')
     $('#scan-in-progress').removeClass('hidden')
     $('#scan-interfaces').html('')
+
     fetch('/getAllNetworks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -178,8 +189,10 @@ function scanAllNetworks() {
     })
         .then(res => res.json())
         .then(data => {
-            //   console.log(data.networks)
             $('.networks').empty();
+
+            let pending = data.networks.length;
+
             data.networks.forEach(network => {
                 fetch('/loadNetworkData', {
                     method: 'POST',
@@ -188,13 +201,23 @@ function scanAllNetworks() {
                 })
                     .then(res => res.json())
                     .then(data => {
-                        appendHostsAndNetworks(0, [network])
-                        $('#cover').addClass('hidden')
-                        $('#scan-in-progress').addClass('hidden')
-                    })
-            })
+                        if (network.cidr) networkHostsCache[network.cidr] = data.networkData;
 
+                        appendHostsAndNetworks(0, [network]);
+
+                        pending--;
+                        if (pending === 0) {
+                            $('#cover').addClass('hidden');
+                            $('#scan-in-progress').addClass('hidden');
+                            resumePing();  // ← RESUME ONLY AFTER ALL SCANS COMPLETE
+                        }
+                    });
+            });
         })
+        .catch(err => {
+            console.error(err);
+            resumePing(); // ← SAFE FAILBACK
+        });
 }
 
 //* Load every network's data from the database 
@@ -211,9 +234,16 @@ function loadAllNetworks() {
         })
 }
 
-//* Load the target network hosts from the database
+//* Load the target network hosts from the database or cache
 function loadNetwork(network) {
+    if (networkHostsCache[network]) {
+        console.log(`Loading hosts for ${network} from cache.`);
+        appendHostsAndNetworks(networkHostsCache[network], 0);
+        return;
+    }
 
+    // If not in cache, retrieve from database nad cache the data
+    console.log(`Loading hosts for ${network} from database (and caching)...`);
     fetch('/loadNetworkData', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -221,9 +251,10 @@ function loadNetwork(network) {
     })
         .then(res => res.json())
         .then(data => {
-            //    console.log(data)
+            networkHostsCache[network] = data.networkData;
             appendHostsAndNetworks(data.networkData, 0)
         })
+        .catch(err => console.error(err));
 }
 
 //* Enables the name and OS inputs for editing.
@@ -258,27 +289,48 @@ function saveDeviceCardInfo() {
             inputEdit.attr('onclick', `editDeviceCardInfo(this.closest('.device-card'))`)
             inputName.removeClass('editing');
             inputOs.removeClass('editing');
-            //   console.log(data.message)
+
+            if (networkHostsCache[selectedNetworkCIDR]) {
+                const hostList = networkHostsCache[selectedNetworkCIDR];
+                const hostIndex = hostList.findIndex(h => h.host_ip === hostIP);
+                if (hostIndex !== -1) {
+                    hostList[hostIndex].host_name = inputName.val();
+                    hostList[hostIndex].host_os = inputOs.val();
+                    console.log(`Cache updated for ${hostIP}.`);
+                }
+            }
         })
 }
 
 //* Update the cards' status and last ping divs
 function updateHostStatus(status) {
     console.log(status)
-    ipDivs = $('.cards').find('div.ip');
-    statusDivs = $('.cards').find('div.status');
-    lastPingDivs = $('.cards').find('div.ping').children()
-    for (let i = 0; i <= ipDivs.length - 1; i++) {
-        let currentIpDiv = ipDivs.eq(i);
-        let currentStatusDiv = statusDivs.eq(i);
-        for (let y = 0; y <= status.length - 1; y++) {
+    const ipDivs = $('.cards').find('div.ip');
+    const statusDivs = $('.cards').find('div.status');
+    const lastPingDivs = $('.cards').find('div.ping');
+
+    for (let i = 0; i < ipDivs.length; i++) {
+        const currentIpDiv = ipDivs.eq(i);
+        const currentStatusDiv = statusDivs.eq(i);
+        for (let y = 0; y < status.length; y++) {
             if (status[y].ip == currentIpDiv.html()) {
                 currentStatusDiv.removeClass();
-               // console.log(status[y].time)
+
                 (status[y].status == 'down')
-                    ? (currentStatusDiv.addClass('status down'), currentStatusDiv.html("🔴 DOWN"))
-                    : (currentStatusDiv.addClass('status up'), currentStatusDiv.html("🟢 UP"));
-                lastPingDivs.eq(i).text(`${status[y].date} - ${status[y].time} ms`)
+                    ? (currentStatusDiv.addClass('status down').html("🔴 DOWN"))
+                    : (currentStatusDiv.addClass('status up').html("🟢 UP"))
+
+                lastPingDivs.eq(i).text(`${status[y].date} - ${status[y].time} ms`);
+
+                const cidr = selectedNetworkCIDR || status[y].network_ip;
+                if (networkHostsCache[cidr]) {
+                    const hostList = networkHostsCache[cidr];
+                    const host = hostList.find(h => h.host_ip === status[y].ip);
+                    if (host) {
+                        host.isAlive = (status[y].status === 'up' ? 1 : 0);
+                        host.last_ping = `${status[y].date} - ${status[y].time} ms`;
+                    }
+                }
                 break;
             }
         }
@@ -293,12 +345,11 @@ function pingAllHosts() {
     })
         .then(res => res.json())
         .then(data => {
-           // console.log(data)
             updateHostStatus(data.connectivityStatus)
         })
 }
 
-//* Retrieve every host from every network
+//* Retrieve every host from every network AND CACHE THEM
 function getAllNetworksHosts() {
     fetch('/getAllNetworksHosts', {
         method: 'POST',
@@ -307,15 +358,17 @@ function getAllNetworksHosts() {
     })
         .then(res => res.json())
         .then(data => {
-
-            data.allHostsList.forEach(hostList => {
-                console.log(hostList)
-                hostList[0].forEach(host => {
-                    allHostsToPing.push(host)
-                })
-            })
-            //   console.log(allHostsToPing)
+            //  { 'cidr1': [host1, ...], 'cidr2': [host1, ...] }
+            networkHostsCache = data.allHostsData;
+            allHostsToPing = [];
+            // Cached hosts into the global allHostsToPing array
+            Object.values(networkHostsCache).forEach(hostList => {
+                hostList.forEach(host => {
+                    allHostsToPing.push({ host_ip: host.host_ip, network_ip: host.network_ip });
+                });
+            });
         })
+        .catch(err => console.error("Error fetching all hosts for caching:", err));
 }
 
 //* Remove the selected host
@@ -329,6 +382,12 @@ function removeDeviceCard(card) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ hostIP, selectedNetworkCIDR })
         })
+        if (networkHostsCache[selectedNetworkCIDR]) {
+            networkHostsCache[selectedNetworkCIDR] = networkHostsCache[selectedNetworkCIDR].filter(h => h.host_ip !== hostIP);
+        }
+        // Also remove from global ping list
+        allHostsToPing = allHostsToPing.filter(h => h.host_ip !== hostIP);
+
         $(card).remove()
     }
 }
@@ -345,6 +404,10 @@ function removeNetwork() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ selectedNetworkCIDR })
         })
+        if (networkHostsCache[selectedNetworkCIDR]) {
+            delete networkHostsCache[selectedNetworkCIDR];
+        }
+        allHostsToPing = allHostsToPing.filter(h => h.network_ip !== selectedNetworkCIDR);
     }
 }
 
@@ -364,3 +427,12 @@ $(document).ready(function () {
     }, 560)
 });
 
+function pausePing() {
+    clearInterval(pingInterval);
+    pingInterval = null;
+}
+
+function resumePing() {
+    if (!pingInterval)
+        pingInterval = setInterval(pingAllHosts, 10000);
+}

@@ -15,11 +15,11 @@ const ping = require('ping');
 nmap.nmapLocation = "/usr/bin/nmap"
 let clientConn = null;
 const rateLimit = rateLimiter({
-	windowMs: 2 * 60 * 1000, // 2 minutes
-	limit: 1000, // Limit each IP to 1000 requests per `window` (here, per 2 minutes).
-	standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
-	legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
-	ipv6Subnet: 56, // Set to 60 or 64 to be less aggressive, or 52 or 48 to be more aggressive. 
+    windowMs: 2 * 60 * 1000, // 2 minutes
+    limit: 1000, // Limit each IP to 1000 requests per `window` (here, per 2 minutes).
+    standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+    ipv6Subnet: 56, // Set to 60 or 64 to be less aggressive, or 52 or 48 to be more aggressive. 
 })
 app.use(rateLimit)
 
@@ -77,7 +77,6 @@ app.post('/getAllNetworks', async (req, res) => {
     const networks = await getNetworksInfo({
         scanHosts: true
     })
-
     //Save the network metadata concurrently.
     const savePromises = networks.map(network => saveNetworkInfo(network))
     await Promise.allSettled(savePromises) 
@@ -159,7 +158,6 @@ async function getNetworksInfo(options = {}) {
 
 //* Endpoint for scanning the specified network and insert each active host into the database
 app.post('/scanNetwork', async (req, res) => {
-    // This function now inherently waits for the scan and host saves
     const networks = await getNetworksInfo({
         targetCIDR: req.body.subnet,
         scanHosts: true
@@ -354,7 +352,7 @@ async function loadNetworkData(targetCIDR) {
             }
         } catch (error) {           
             console.error("Error trying to retrieve network data: ", error)
-            return [] // Return empty array on error
+            return []
         } finally {
             if (con) con.release() // CRITICAL: Release connection back to pool
         }
@@ -380,34 +378,41 @@ async function updateHostDetails(hostIP, newName, newOs, networkCIDR) {
 }
 
 
-//* Retrieve ALL hosts of ALL networks
+//* Retrieve ALL hosts of ALL networks and return as a map for caching {cidr: [hosts]}
 app.post('/getAllNetworksHosts', async (req, res) => {
+    const con = await getDatabaseConnection();
+    const allHostsData = {}; 
+    
+    try {
+        const getNetworks = `SELECT cidr FROM networks_data`;
+        const [networkList] = await con.query(getNetworks); 
 
-            const con = await getDatabaseConnection()
-            const allHostsList = []
-            const getNetworks = `SELECT cidr FROM networks_data`
-            const networkList = await con.query(getNetworks)
+        const fetchPromises = networkList.map(async (network) => {
+            const tableName = convertIPtoTableName(network.cidr);
+            const getHosts = `SELECT * FROM ${tableName}`;          
+            const [hostList] = await con.query(getHosts); 
+            allHostsData[network.cidr] = hostList;
+        });
 
-            for (const network of networkList[0]) { 
-                const tableName = convertIPtoTableName(network.cidr);
-                const getHosts = `SELECT host_ip, network_ip FROM ${tableName}`;
-                
-                const hostList = await con.query(getHosts); 
-             //   console.log(hostList)
-                allHostsList.push(hostList);
-            }
-            
-            res.json({ allHostsList })
+        await Promise.all(fetchPromises);
+        res.json({ allHostsData });
+
+    } catch (error) {
+        console.error("Error retrieving all network hosts for caching:", error);
+        res.status(500).json({ error: "Failed to retrieve all host data." });
+    } finally {
+        con.release();
+    }
 })
 
 //* Remove a host from the table
 app.post('/removeHost', async (req, res) => {
     const con = await getDatabaseConnection()
-    const networkCIDR = convertIPtoTableName(req.body.selectedNetworkCIDR)
+    const tableName = convertIPtoTableName(req.body.selectedNetworkCIDR)
     try {
-        con.query(`DELETE FROM ${networkCIDR} WHERE host_ip = "${req.body.hostIP}"`) 
+        con.query(`DELETE FROM ${tableName} WHERE host_ip = ?`, [req.body.hostIP]) 
     } catch (error) {
-        console.log("Error deleting the host", error, hostIP)
+        console.log("Error deleting the host", error, req.body.hostIP) 
     } finally { 
         res.sendStatus(200)
         con.release() }
