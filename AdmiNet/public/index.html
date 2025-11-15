@@ -8,9 +8,10 @@
   <link rel="stylesheet" href="styles.css">
   <script src="libs/require.js"></script>
   <script src="libs/jquery-3.7.1.js"></script>
-  <script src="clientSshFunctions.js"></script>
-  <script src="clientNetworkFunctions.js"></script>
-  <script src="clientWebSocket.js"></script>
+  <script src="js/remoteConnectionFunctions.js"></script>
+  <script src="js/clientNetworkFunctions.js"></script>
+  <script src="js/SFTPFunctions.js"></script>
+  <script src="js/clientWebSocket.js"></script>
   >
 </head>
 
@@ -84,12 +85,25 @@
       </div>
       <p id="scan-completed"></p>
     </div>
-    
+
   </div>
   <div class="bottom-bar">
     <button id="connect-btn" class="btn">Connect to Selected Device</button>
+
+    <div id="connect-menu" class="connect-menu hidden">
+      <div class="menu-item" onclick="connectSSH()">SSH</div>
+      <div class="menu-item" onclick="connectTelnet()">Telnet</div>
+      <div class="menu-item" onclick="showLogin()">SFTP</div>
+    </div>
   </div>
-  
+
+
+
+  <div id="loginBox" class="scan-box">
+    <h2>🔐 Connect to SFTP</h2> <input type="text" id="username" placeholder="Username"> <input type="password"
+      id="password" placeholder="Password"> <button class="btn" onclick="connectSFTP()">Connect</button>
+    <div id="loginError" class="error"></div>
+  </div>
 </body>
 
 </html>

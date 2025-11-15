@@ -1,0 +1,146 @@
+:root {
+    --bg: #0b1220;
+    --panel: #0f1724;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --glass: rgba(255, 255, 255, 0.03);
+    --success: #22c55e;
+    --danger: #ef4444;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    background: linear-gradient(180deg, var(--bg), #07101a 120%);
+    color: #e6eef8;
+}
+
+.scan-box {
+    background: var(--glass);
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 400px;
+    margin: 50px auto;
+}
+
+.scan-box h2 {
+    margin: 0 0 10px 0;
+    color: var(--accent);
+    font-size: 18px;
+    text-align: center;
+}
+
+input[type=text],
+input[type=password],
+input[type=file] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    color: #e6eef8;
+    font-size: 14px;
+}
+
+input::placeholder {
+    color: var(--muted);
+}
+
+button.btn {
+    background: var(--accent);
+    color: #04202a;
+    font-weight: 600;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button.btn:hover {
+    background: #1eaaff;
+}
+
+.error {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 5px;
+    text-align: center;
+}
+
+#fileBrowser {
+    max-width: 800px;
+    margin: 20px auto;
+    background: var(--panel);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#fileBrowser h2 {
+    margin: 10px;
+    color: var(--accent);
+    font-size: 16px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #e6eef8;
+}
+
+th,
+td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 14px;
+    text-align: left;
+}
+
+th {
+    background: #111c2d;
+    color: var(--accent);
+}
+
+tr:hover {
+    background: rgba(56, 189, 248, 0.08);
+}
+
+.action-btn {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.action-btn:hover {
+    background: rgba(56, 189, 248, 0.12);
+}
+
+.hidden {
+    display: none;
+}
+
+.modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+}
+
+.modal.hidden {
+    display: none;
+}

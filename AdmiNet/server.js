@@ -43,21 +43,21 @@ const path = require('path')
 
 const NetWorkScanner = require('network-scanner-js')
 const netScan = new NetWorkScanner()
-require('events').EventEmitter.defaultMaxListeners = 50 
+require('events').EventEmitter.defaultMaxListeners = 50
 const networkInfo = require('network-info')
 const { table } = require('console')
 
 //? <------ WEBSOCKET ------>
 const webSocketServer = new WebSocketServer({
     httpServer: server,
-    autoAcceptConnections: false 
+    autoAcceptConnections: false
 })
 
 webSocketServer.on("request", function (req) {
     if (req.origin === 'http://localhost:3001' || req.origin === 'http://adminetwork.duckdns.org') {
-    const connection = req.accept(null, req.origin)
+        const connection = req.accept(null, req.origin)
         connection.on("close", function () {
-                    console.log("Server closed")
+            console.log("Server closed")
         })
         clientConn = connection;
     } else {
@@ -79,7 +79,7 @@ app.post('/getAllNetworks', async (req, res) => {
     })
     //Save the network metadata concurrently.
     const savePromises = networks.map(network => saveNetworkInfo(network))
-    await Promise.allSettled(savePromises) 
+    await Promise.allSettled(savePromises)
 
     res.json({ networks })
 })
@@ -87,42 +87,42 @@ app.post('/getAllNetworks', async (req, res) => {
 //* Gets the info of 1 or all network INTERFACES, whether there is a targetCIDR or not, and scans all the hosts if specified
 async function getNetworksInfo(options = {}) {
     const {
-        targetCIDR = null,    
-        scanHosts = false    
+        targetCIDR = null,
+        scanHosts = false
     } = options
 
     const interfaces = os.networkInterfaces()
     const networks = []
-    const scanPromises = [] 
+    const scanPromises = []
 
     for (const interfaceName in interfaces) {
-        
+
         for (const iface of interfaces[interfaceName]) {
-      
+
             if (iface.family === 'IPv4' && !iface.internal) {
                 const subnet = ip.subnet(iface.address, iface.netmask)
                 const interfaceCIDR = `${subnet.networkAddress}/${subnet.subnetMaskLength}`
                 clientConn.sendUTF(JSON.stringify({ network: interfaceCIDR, type: 'foundNetwork', msg: "" }))
                 if (targetCIDR) {
-                    const [targetHostIP] = targetCIDR.split('/')           
+                    const [targetHostIP] = targetCIDR.split('/')
                     if (iface.address === targetHostIP) {
                         const networkSubnet = ip.cidrSubnet(targetCIDR)
                         const networkCIDR = `${networkSubnet.networkAddress}/${targetCIDR.split('/')[1]}`
-                        
+
                         const networkInfo = {
                             interface: interfaceName,
-                            ip: iface.address,          
-                            netmask: iface.netmask,      
-                            cidr: networkCIDR,           
-                            hostCIDR: targetCIDR        
+                            ip: iface.address,
+                            netmask: iface.netmask,
+                            cidr: networkCIDR,
+                            hostCIDR: targetCIDR
                         }
                         networks.push(networkInfo)
-                                        
+
                         if (scanHosts) {
                             scanPromises.push(retrieveHostInfo(networkCIDR))
                         }
                     }
-                } else {             
+                } else {
                     const networkInfo = {
                         interface: interfaceName,
                         ip: iface.address,
@@ -134,7 +134,7 @@ async function getNetworksInfo(options = {}) {
                         scanPromises.push(retrieveHostInfo(interfaceCIDR))
                     }
                 }
-           }
+            }
         }
     }
 
@@ -142,9 +142,9 @@ async function getNetworksInfo(options = {}) {
         console.log(`Waiting for ${scanPromises.length} network scans to complete...`)
         const scanResults = await Promise.allSettled(scanPromises)
         scanResults.forEach(result => {
-             if (result.status === 'rejected') {
-                 console.error('One network scan failed:', result.reason)
-             }
+            if (result.status === 'rejected') {
+                console.error('One network scan failed:', result.reason)
+            }
         })
         console.log('All network scans and host saves are complete.')
     }
@@ -176,36 +176,36 @@ app.post('/scanNetwork', async (req, res) => {
 function retrieveHostInfo(subnet) {
     return new Promise((resolve, reject) => {
         console.log(`Starting NMAP scan for subnet: ${subnet}`)
-        
+
         const scan = new nmap.NmapScan(subnet, "-O")
-        
+
         scan.once('complete', (data) => {
-            clientConn.sendUTF(JSON.stringify({ type: 'scanComplete', msg: '', network: subnet}))
+            clientConn.sendUTF(JSON.stringify({ type: 'scanComplete', msg: '', network: subnet }))
             console.log(`NMAP found ${data.length} hosts in ${subnet}. Starting concurrent saves...`)
-            
+
 
             const savePromises = data.map(hostData =>
                 saveHostsInfo(subnet, hostData).catch(err => {
                     console.error(`Error saving host ${hostData.ip}:`, err.message)
-                    return { status: 'rejected', reason: err } 
+                    return { status: 'rejected', reason: err }
                 })
             )
-            
+
             Promise.allSettled(savePromises)
                 .then(() => {
                     console.log(`All host save operations completed for ${subnet}`)
-                    resolve({ subnet: subnet, hosts: data.length }) 
+                    resolve({ subnet: subnet, hosts: data.length })
                 })
                 .catch(err => {
-                    
+
                     console.error(`Error during concurrent host saving coordination for ${subnet}:`, err)
                     resolve({ subnet: subnet, hosts: data.length, error: 'Internal save coordination failure' })
                 })
         })
-        
+
         scan.once('error', (err) => {
             console.error(`NMAP scan error for ${subnet}:`, err)
-            reject(err) 
+            reject(err)
         })
         scan.startScan()
     })
@@ -232,32 +232,33 @@ app.post('/updateHostDetails', async (req, res) => {
 //* Ping every host in the list to check connectivity
 app.post('/pingAllHosts', async (req, res) => {
 
-    const hostsToPing = req.body.allHostsToPing; 
-    const pingPromises = hostsToPing.map(host => 
+    const hostsToPing = req.body.allHostsToPing;
+    const pingPromises = hostsToPing.map(host =>
         ping.promise.probe(host.host_ip)
     );
 
     let results;
-    try { results = await Promise.all(pingPromises);
+    try {
+        results = await Promise.all(pingPromises);
     } catch (e) {
         console.error("An error occurred during one or more pings:", e);
         return res.status(500).json({ error: "Failed to complete all ping checks." });
     }
     const connectivityStatus = results.map((res, index) => {
-        
+
         const networkIP = hostsToPing[index].network_ip;
-        
+
         return {
             ip: res.numeric_host,
             network_ip: networkIP,
             status: res.alive ? 'up' : 'down',
-            time: res.time, 
+            time: res.time,
             date: getDate()
         };
     });
-    for ( const result of connectivityStatus ) {
+    for (const result of connectivityStatus) {
         updateHostStatus(result)
-    } 
+    }
     res.json({ connectivityStatus });
 });
 
@@ -268,12 +269,12 @@ async function updateHostStatus(result) {
     //console.log(result)
     const con = await getDatabaseConnection()
     const now = getDate()
-    try {   
+    try {
         const isAlive = (result.status == 'up') ? true : false
         const hostIP = result.ip
         const tableName = convertIPtoTableName(result.network_ip)
         const updateStatus = `UPDATE IGNORE ${tableName} SET isAlive = ?, last_ping = ? WHERE host_ip = ?`
-        await con.query(updateStatus, [ isAlive, now, hostIP ])
+        await con.query(updateStatus, [isAlive, now, hostIP])
     }
     catch (e) {
         console.log("Error on updating host stauts: ", e)
@@ -290,13 +291,13 @@ async function saveHostsInfo(network, hostData) {
     const con = await getDatabaseConnection() // Use pool
     console.log(hostData)
     try {
-        await createNetworkTableIfNotExists(tableName, con) 
+        await createNetworkTableIfNotExists(tableName, con)
 
         const insertHost = `INSERT IGNORE INTO ${tableName} SET network_ip = ?,
                             host_ip = ?, host_name = ?, host_os = ?, openPorts = ?`
         await con.query(insertHost, [
-            network, 
-            hostData.ip, 
+            network,
+            hostData.ip,
             hostData.hostname,
             hostData.osNmap,
             JSON.stringify(hostData.openPorts)
@@ -317,20 +318,20 @@ async function saveNetworkInfo(network) {
 
     const con = await getDatabaseConnection() // Use pool
 
-        try {
-            const insertNetwork = `INSERT IGNORE INTO networks_data SET cidr = ?, interface = ?, netmask = ?`
-            await con.query(insertNetwork, [ network.cidr, network.interface, network.netmask ])
-        } catch (err) {
-            console.error('Database error when inserting networkdata', network, err)
-        } finally {
-            if (con) con.release() 
-        }
+    try {
+        const insertNetwork = `INSERT IGNORE INTO networks_data SET cidr = ?, interface = ?, netmask = ?`
+        await con.query(insertNetwork, [network.cidr, network.interface, network.netmask])
+    } catch (err) {
+        console.error('Database error when inserting networkdata', network, err)
+    } finally {
+        if (con) con.release()
+    }
 
 }
 
 app.post('/loadNetworkData', async (req, res) => {
-  const [networkData] = await loadNetworkData(req.body.network)
-  res.json({ networkData })
+    const [networkData] = await loadNetworkData(req.body.network)
+    res.json({ networkData })
 })
 //* Retrieve the data of all the networks, or only (?the hosts of?) a target network
 async function loadNetworkData(targetCIDR) {
@@ -338,24 +339,24 @@ async function loadNetworkData(targetCIDR) {
     const tableName = convertIPtoTableName(targetCIDR)
     const con = await getDatabaseConnection() // Use pool
 
-        try {
-            if(targetCIDR != 0) {
-                const getHostsData = `SELECT * FROM ${tableName}`
-                const hostsData = await con.query(getHostsData)
-                return hostsData
-            }
-            else {
-                 const getNetworkData = `SELECT * FROM networks_data`
-                 const networkData = con.query(getNetworkData)
-                 
-                 return networkData
-            }
-        } catch (error) {           
-            console.error("Error trying to retrieve network data: ", error)
-            return []
-        } finally {
-            if (con) con.release() // CRITICAL: Release connection back to pool
+    try {
+        if (targetCIDR != 0) {
+            const getHostsData = `SELECT * FROM ${tableName}`
+            const hostsData = await con.query(getHostsData)
+            return hostsData
         }
+        else {
+            const getNetworkData = `SELECT * FROM networks_data`
+            const networkData = con.query(getNetworkData)
+
+            return networkData
+        }
+    } catch (error) {
+        console.error("Error trying to retrieve network data: ", error)
+        return []
+    } finally {
+        if (con) con.release() // CRITICAL: Release connection back to pool
+    }
 }
 
 //* Update the name and operative system of the specified host
@@ -364,10 +365,10 @@ async function updateHostDetails(hostIP, newName, newOs, networkCIDR) {
     const con = await getDatabaseConnection();
 
     try {
-        const updateHost = `UPDATE ${tableName} SET host_name = ?, host_os = ? WHERE host_ip = ?;`;   
-        const [result] = await con.query(updateHost, [newName, newOs, hostIP ]);
+        const updateHost = `UPDATE ${tableName} SET host_name = ?, host_os = ? WHERE host_ip = ?;`;
+        const [result] = await con.query(updateHost, [newName, newOs, hostIP]);
 
-        return { message: 'Update successful', result};
+        return { message: 'Update successful', result };
 
     } catch (err) {
         console.error('Database error during host update:', err);
@@ -381,16 +382,16 @@ async function updateHostDetails(hostIP, newName, newOs, networkCIDR) {
 //* Retrieve ALL hosts of ALL networks and return as a map for caching {cidr: [hosts]}
 app.post('/getAllNetworksHosts', async (req, res) => {
     const con = await getDatabaseConnection();
-    const allHostsData = {}; 
-    
+    const allHostsData = {};
+
     try {
         const getNetworks = `SELECT cidr FROM networks_data`;
-        const [networkList] = await con.query(getNetworks); 
+        const [networkList] = await con.query(getNetworks);
 
         const fetchPromises = networkList.map(async (network) => {
             const tableName = convertIPtoTableName(network.cidr);
-            const getHosts = `SELECT * FROM ${tableName}`;          
-            const [hostList] = await con.query(getHosts); 
+            const getHosts = `SELECT * FROM ${tableName}`;
+            const [hostList] = await con.query(getHosts);
             allHostsData[network.cidr] = hostList;
         });
 
@@ -410,13 +411,14 @@ app.post('/removeHost', async (req, res) => {
     const con = await getDatabaseConnection()
     const tableName = convertIPtoTableName(req.body.selectedNetworkCIDR)
     try {
-        con.query(`DELETE FROM ${tableName} WHERE host_ip = ?`, [req.body.hostIP]) 
+        con.query(`DELETE FROM ${tableName} WHERE host_ip = ?`, [req.body.hostIP])
     } catch (error) {
-        console.log("Error deleting the host", error, req.body.hostIP) 
-    } finally { 
+        console.log("Error deleting the host", error, req.body.hostIP)
+    } finally {
         res.sendStatus(200)
-        con.release() }
-}) 
+        con.release()
+    }
+})
 
 //* Remove a network from the databse
 
@@ -430,19 +432,20 @@ app.post('/removeNetwork', async (req, res) => {
         await con.query(removeNetworkData, [req.body.selectedNetworkCIDR])
     } catch (error) {
         console.log("Error deleting the network", error, tableName)
-    } finally { 
+    } finally {
         res.sendStatus(200)
-        con.release() }
-}) 
+        con.release()
+    }
+})
 
-//? <----- SSH FUNCTIONS ----->
+//? <----- SSH ----->
 
-webSocketServer.on('request', function(req) {
+webSocketServer.on('request', function (req) {
     if (req.resource === '/ssh') {
-     //   const connection = req.accept(null, req.origin);
+        //   const connection = req.accept(null, req.origin);
         let sshClient;
 
-        clientConn.on('message', async function(message) {
+        clientConn.on('message', async function (message) {
             const data = JSON.parse(message.utf8Data);
 
             if (data.ip && data.user && data.pass) {
@@ -473,9 +476,88 @@ webSocketServer.on('request', function(req) {
 
         clientConn.on('close', () => { if (sshClient) sshClient.end(); });
     } else {
-       // req.reject();
+        // req.reject();
     }
 });
+
+//? <----- SFTP ----->
+
+const SftpClient = require('ssh2-sftp-client');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
+
+//* List the current directory
+app.post('/api/list', async (req, res) => {
+    const { username, password, dir } = req.body;
+    const ip = req.body.ip || sessionStorage.getItem('ssh_ip'); // optional dynamic IP from client
+
+    if (!username || !password) return res.json({ success: false, error: 'Missing credentials' });
+
+    const sftp = new SftpClient();
+    try {
+        await sftp.connect({
+            host: ip,
+            port: 22,
+            username,
+            password
+        });
+        const files = await sftp.list(dir || '.');
+        await sftp.end();
+        res.json({ success: true, files });
+    } catch (err) {
+        console.error('SFTP list error:', err);
+        res.json({ success: false, error: err.message });
+    }
+});
+
+//* Download selected file
+//TODO: Compress and download folders
+app.post('/api/download', async (req, res) => {
+    const { username, password, filePath, ip } = req.body;
+    if (!filePath) return res.status(400).send('Missing file path');
+
+    const sftp = new SftpClient();
+    const tempPath = path.join(__dirname, 'uploads', path.basename(filePath));
+
+    try {
+        await sftp.connect({
+            host: ip,
+            port: 22,
+            username,
+            password
+        });
+        await sftp.fastGet(filePath, tempPath);
+        await sftp.end();
+        res.download(tempPath);
+    } catch (err) {
+        console.error('SFTP download error:', err);
+        res.status(500).send('Error downloading file');
+    }
+});
+
+//* Upload stuff
+app.post('/api/upload', upload.single('file'), async (req, res) => {
+    const { username, password, remoteDir, ip } = req.body;
+    const localFilePath = req.file.path;
+    const remoteFileName = req.file.originalname;
+
+    const sftp = new SftpClient();
+    try {
+        await sftp.connect({
+            host: ip,
+            port: 22,
+            username,
+            password
+        });
+        await sftp.fastPut(localFilePath, path.posix.join(remoteDir, remoteFileName));
+        await sftp.end();
+        res.sendStatus(200);
+    } catch (err) {
+        console.error('SFTP upload error:', err);
+        res.status(500).json({ error: 'Upload failed' });
+    }
+});
+
 
 //? <------ UTILITY FUNCTIONS ------>
 
@@ -501,12 +583,12 @@ function getDate() {
 //* wait 
 function wait(ms) {
     return new Promise((resolve) => {
-    setTimeout(resolve, ms)
-})
+        setTimeout(resolve, ms)
+    })
 }
 //* Convert IP (i.e: 192.168.1.0/24) to 192_168_1_0_24
 function convertIPtoTableName(IP) {
-    if(IP == 0) return IP
+    if (IP == 0) return IP
     IP = IP.replace(/[.\/]/g, '_')
     return IP
 }
@@ -526,9 +608,9 @@ async function createNetworkTableIfNotExists(tableName, con) {
             UNIQUE unique_host_ip (host_ip)
         ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
         `
-        await con.query(createTable) 
+        await con.query(createTable)
     } catch (error) {
         console.error(`Error creating table ${tableName}:`, error)
-        throw error; 
+        throw error;
     }
 }
