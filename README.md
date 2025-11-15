@@ -13,8 +13,7 @@ Logs information about each host like the last ping, last ssh connection, active
 
 ## TODO: 
   - Rename some functions names to be less confusing
-  - Column to save ports, protocols and services of each host, display it on details...
-  - SSH Connection with keytar to manage ssh keys
+  - Telnet connection. Polish ssh and sftp, implement keytar.
   - Logs for each device and network (Perchance, implement AI so you can ask it to provide you with specific data in the logs)
   - Implement Electron for the desktop app version
   - Users, permissions...
