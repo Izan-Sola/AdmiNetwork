@@ -6,7 +6,7 @@ let regExpOS = new RegExp(`(Linux|Windows|Mac|Android)`, "i");
 //Consolas, 'Courier New', monospace
 //*Scan the target network
 function networkScan(subnet = 0) {
-    pausePing();  // ← STOP PINGING DURING SCAN
+    pausePing();  
 
     const IP = $('#scan-network').val();
     const mask = $('#scan-mask').val();
@@ -34,12 +34,12 @@ function networkScan(subnet = 0) {
                     });
 
                     appendHostsAndNetworks(hostData.networkData, networks);
-                    resumePing(); // ← RESUME AFTER FINISHING
+                    resumePing();
                 });
         })
         .catch(err => {
             console.error(err);
-            resumePing(); // ← MAKE SURE TO RESUME ON ERROR TOO
+            resumePing(); 
         });
 }
 
@@ -176,7 +176,7 @@ function searchCoincidences(searchText) {
 
 //* Scan all the available network interfaces
 function scanAllNetworks() {
-    pausePing();  // ← PAUSE PINGING
+    pausePing(); 
 
     $('#cover').removeClass('hidden')
     $('#scan-in-progress').removeClass('hidden')
@@ -209,14 +209,14 @@ function scanAllNetworks() {
                         if (pending === 0) {
                             $('#cover').addClass('hidden');
                             $('#scan-in-progress').addClass('hidden');
-                            resumePing();  // ← RESUME ONLY AFTER ALL SCANS COMPLETE
+                            resumePing(); 
                         }
                     });
             });
         })
         .catch(err => {
             console.error(err);
-            resumePing(); // ← SAFE FAILBACK
+            resumePing();
         });
 }
 

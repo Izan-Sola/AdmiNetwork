@@ -437,6 +437,45 @@ app.post('/removeNetwork', async (req, res) => {
 
 //? <----- SSH FUNCTIONS ----->
 
+webSocketServer.on('request', function(req) {
+    if (req.resource === '/ssh') {
+     //   const connection = req.accept(null, req.origin);
+        let sshClient;
+
+        clientConn.on('message', async function(message) {
+            const data = JSON.parse(message.utf8Data);
+
+            if (data.ip && data.user && data.pass) {
+                sshClient = new ssh.Client();
+                sshClient.on('ready', () => {
+                    clientConn.sendUTF('\x1b[32mSSH Connected!\x1b[0m\r\n$ ');
+                    sshClient.shell((err, stream) => {
+                        if (err) return clientConn.sendUTF('Error opening shell\r\n');
+                        stream.on('data', chunk => clientConn.sendUTF(chunk.toString()));
+                        stream.on('close', () => sshClient.end());
+                        clientConn.on('message', msg => {
+                            const cmdData = JSON.parse(msg.utf8Data);
+                            if (cmdData.cmd) stream.write(cmdData.cmd);
+                        });
+                    });
+                }).connect({
+                    host: data.ip,
+                    port: 22,
+                    username: data.user,
+                    password: data.pass
+                });
+
+                sshClient.on('error', err => clientConn.sendUTF(`\x1b[31mSSH Error: ${err.message}\x1b[0m\r\n`));
+            } else if (data.cmd && sshClient) {
+                // handled by shell listener
+            }
+        });
+
+        clientConn.on('close', () => { if (sshClient) sshClient.end(); });
+    } else {
+       // req.reject();
+    }
+});
 
 //? <------ UTILITY FUNCTIONS ------>
 
