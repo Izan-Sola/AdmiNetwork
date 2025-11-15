@@ -2,8 +2,8 @@
 Administrate the available networks with this Electron web applicaton.
 
 Scan all the available networks and its hosts, servers, virtual machines, retrieving advanced info like the operative system, open ports, active services...
-Connect to any available host with SSH if possible.
-Logs information about each host like the last ping, last ssh connection, active time, services...
+Connect to any available device remotely if possible with SSH, SFTP or telnet.
+Logs information about each host like the last ping, last connections, active time, services...
 
 ## Preview:
 
