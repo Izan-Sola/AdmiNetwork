@@ -1,0 +1,198 @@
+:root{
+    --bg:#07101a;
+    --panel:#0f1724;
+    --accent:#38bdf8;
+    --muted:#94a3b8;
+    --card:#0b1320;
+    --terminal-bg:#04121a;
+    --terminal-text:#d8f3ff;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    color-scheme: dark;
+  }
+  
+  html,body {
+    height:100%;
+    margin:0;
+    background:linear-gradient(180deg,var(--bg),#05101a);
+    color:#e6eef8;
+  }
+  
+  .connect-btn {
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    padding:10px 12px;
+    border-radius:8px;
+    border:none;
+    background:var(--accent);
+    color:#032;
+    cursor:pointer;
+    z-index:50;
+    font-weight:600;
+  }
+  .hidden { display:none }
+  
+  /* Panel */
+  .ssh-panel {
+    position:fixed;
+    inset:20px;
+    display:flex;
+    flex-direction:column;
+    background:linear-gradient(180deg,rgba(6,10,18,0.95),rgba(2,6,12,0.98));
+    border-radius:10px;
+    box-shadow:0 12px 40px rgba(0,0,0,0.6);
+    overflow:hidden;
+  }
+  
+  /* Topbar */
+  .topbar {
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+    background:linear-gradient(180deg,rgba(255,255,255,0.03),transparent);
+  }
+  .brand {
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .logo {
+    width:44px;
+    height:44px;
+    border-radius:8px;
+    background:linear-gradient(135deg,var(--accent),#7dd3fc);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#042024;
+    font-weight:700;
+  }
+  .title { font-size:16px; }
+  .top-actions { color:var(--muted); font-size:14px; }
+  
+  /* layout */
+  .container {
+    display:grid;
+    grid-template-columns:260px 1fr;
+    gap:18px;
+    padding:18px;
+    flex:1;
+    box-sizing:border-box;
+    height:calc(100% - 64px);
+  }
+  .sidebar {
+    background:linear-gradient(180deg,var(--card),#0b1622);
+    padding:16px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,0.03);
+    color:var(--muted);
+    overflow:auto;
+  }
+  .sidebar h3 {
+    margin:0 0 10px 0;
+  }
+  .info-list {
+    list-style:none;
+    padding:0;
+    margin:0;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    font-size:13px;
+  }
+  
+  /* main */
+  .main {
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .controls-row {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+  }
+  .left-controls {
+    display:flex;
+    gap:8px;
+  }
+  .btn {
+    background:var(--accent);
+    color:#042024;
+    padding:8px 10px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .btn.small {
+    padding:6px 8px;
+    font-size:13px;
+  }
+  
+  /* terminal */
+  .terminal-area {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    min-height:400px;
+  }
+  .terminal-screen {
+    flex:1;
+    border-radius:10px;
+    background:var(--terminal-bg);
+    border:1px solid rgba(255,255,255,0.05);
+    overflow:hidden;
+    position:relative;
+  }
+  
+  /* xterm theme override */
+  .xterm {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    height:100%;
+    width:100%;
+    padding:10px;
+    box-sizing:border-box;
+  }
+  .xterm-viewport::-webkit-scrollbar {
+    width:8px;
+    background-color:transparent;
+  }
+  .xterm-viewport::-webkit-scrollbar-thumb {
+    background:rgba(255,255,255,0.1);
+    border-radius:4px;
+  }
+  .xterm .xterm-screen {
+    padding:6px;
+  }
+  
+  /* typing bar */
+  .typing-bar {
+    display:flex;
+    gap:8px;
+    margin-top:8px;
+  }
+  .cmd-input {
+    flex:1;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,0.04);
+    background:rgba(255,255,255,0.02);
+    color:inherit;
+    font-family:monospace;
+  }
+  .ip-display { color:var(--muted); font-weight:700; }
+  
+  @media (max-width:900px){
+    .container { grid-template-columns:1fr; padding:12px; grid-auto-rows:auto }
+    .sidebar { order:2 }
+    .topbar { padding:0 12px }
+  }
+  
