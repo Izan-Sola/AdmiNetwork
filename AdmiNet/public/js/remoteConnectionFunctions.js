@@ -1,9 +1,11 @@
 function connectSSH() {
     const card = $('.device-card.selected')[0];
     if (!card) return alert('Select a device first');
+
     const ip = $(card).find('.ip').text().trim();
     const user = prompt('Enter username:');
     const pass = prompt('Enter password:');
+    
     if (!user || !pass) return;
 
     sessionStorage.setItem('ssh_ip', ip);
@@ -25,27 +27,10 @@ function showLogin() {
     $('#loginBox').show();
 }
 
-// function  connectSFTP() {
-//     const user = $('#username').val().trim();
-//     const pass = $('#password').val().trim();
-
-//     if (!user || !pass) {
-//         $('#loginError').text('Enter username and password');
-//         return;
-//     }
-
-//     sessionStorage.setItem('ssh_user', user);
-//     sessionStorage.setItem('ssh_pass', pass);
-
-//     $('#loginBox').hide();
-//     window.location.href = 'sftpbrowser.html';
-// }
 
 $(document).ready(function () {
     $('#connect-btn').on('click', () => {
         $('#connect-menu').toggleClass('hidden');
     });
-
-    // Attach the login button
     $('#loginBox button').on('click', connectSFTP);
 });

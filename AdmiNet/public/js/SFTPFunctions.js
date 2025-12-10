@@ -18,15 +18,13 @@ async function connectSFTP() {
     document.getElementById('loginError').textContent = '❌ ' + data.error
     return
   }
-
-  // Store credentials AND initial file data
+  //* Store credentials AND initial file data
   sessionStorage.setItem('ssh_user', username)
   sessionStorage.setItem('ssh_pass', password)
   sessionStorage.setItem('initial_files', JSON.stringify(data.files))
   sessionStorage.setItem('initial_dir', '.')
-
-  // Navigate to file browser
   window.location.href = 'sftpbrowser.html'
+
 }
 
 async function loadDir(dir) {
@@ -43,6 +41,7 @@ async function loadDir(dir) {
   renderFiles(data.files, dir)
 }
 
+//*Display the files and relevant info 
 function renderFiles(files, dir) {
   const fileTable = document.querySelector('#fileTable tbody')
   const pathDisplay = document.querySelector('#path')

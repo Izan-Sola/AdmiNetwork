@@ -310,6 +310,7 @@ aside>.networks>.network-item:hover {
 .ping {
   font-size: 13px;
   color: var(--muted);
+  font-weight: bold;
 }
 
 .bottom-row {
@@ -743,3 +744,5 @@ h4.ports-services {
     margin-top: 10px;
     min-height: 18px;
 }
+
+

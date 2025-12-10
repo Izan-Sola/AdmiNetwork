@@ -1,6 +1,6 @@
 
 jQuery 
-express, Musql
+express, Mysql
 node js
 node ssh
 Electron 

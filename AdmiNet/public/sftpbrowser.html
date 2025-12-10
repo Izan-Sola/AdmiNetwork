@@ -9,10 +9,12 @@
 <body>
     <div class="app">
         <div class="main">
-          
-            <div>
-                <input type="file" id="file-input">
-                <button onclick="uploadFile()">Upload File</button>
+            <div id="sftp-action-buttons">
+                <label for="file-input" id="file-input-label">
+                    <p>Choose file</p>
+                </label>
+                <input type="file" id="file-input" value="Choose file">
+                <button id="upload-file" onclick="uploadFile()">Upload File</button>
             </div>
             
             <div id="fileBrowser" class="content">

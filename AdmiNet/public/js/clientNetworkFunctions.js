@@ -320,7 +320,7 @@ function updateHostStatus(status) {
                     ? (currentStatusDiv.addClass('status down').html("🔴 DOWN"))
                     : (currentStatusDiv.addClass('status up').html("🟢 UP"))
 
-                lastPingDivs.eq(i).text(`${status[y].date} - ${status[y].time} ms`);
+                if  (status[y].status == 'up') lastPingDivs.eq(i).text(`${status[y].date} - ${status[y].time} ms`);
 
                 const cidr = selectedNetworkCIDR || status[y].network_ip;
                 if (networkHostsCache[cidr]) {

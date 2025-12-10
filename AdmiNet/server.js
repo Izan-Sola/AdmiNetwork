@@ -12,7 +12,9 @@ const ip = require('ip')
 const nmap = require('node-nmap')
 
 const ping = require('ping');
-nmap.nmapLocation = "/usr/bin/nmap"
+// nmap.nmapLocation = "/usr/bin/nmap"
+nmap.nmapLocation = "C:\Program Files (x86)\Nmap\nmap.exe"
+
 let clientConn = null;
 const rateLimit = rateLimiter({
     windowMs: 2 * 60 * 1000, // 2 minutes
@@ -66,7 +68,7 @@ webSocketServer.on("request", function (req) {
 })
 //TODO: SSH CONNECTION, COLUMN FOR PORT AND SERVICE INFO...
 server.listen(3001, '0.0.0.0', () => {
-    console.log('Server started on 192.168.18.48')
+    console.log('Server started')
 })
 
 //? <------ NETWORK FUNCTIONS ------->
@@ -271,10 +273,13 @@ async function updateHostStatus(result) {
     const now = getDate()
     try {
         const isAlive = (result.status == 'up') ? true : false
-        const hostIP = result.ip
-        const tableName = convertIPtoTableName(result.network_ip)
-        const updateStatus = `UPDATE IGNORE ${tableName} SET isAlive = ?, last_ping = ? WHERE host_ip = ?`
-        await con.query(updateStatus, [isAlive, now, hostIP])
+        if(isAlive) {
+            const hostIP = result.ip
+            const tableName = convertIPtoTableName(result.network_ip)
+            const updateStatus = `UPDATE IGNORE ${tableName} SET isAlive = ?, last_ping = ? WHERE host_ip = ?`
+            await con.query(updateStatus, [isAlive, now, hostIP])
+        }
+
     }
     catch (e) {
         console.log("Error on updating host stauts: ", e)
@@ -430,6 +435,7 @@ app.post('/removeNetwork', async (req, res) => {
         await con.query(`DROP TABLE IF EXISTS ${tableName}`)
         removeNetworkData = `DELETE FROM networks_data WHERE cidr = ?`
         await con.query(removeNetworkData, [req.body.selectedNetworkCIDR])
+
     } catch (error) {
         console.log("Error deleting the network", error, tableName)
     } finally {
@@ -470,7 +476,7 @@ webSocketServer.on('request', function (req) {
 
                 sshClient.on('error', err => clientConn.sendUTF(`\x1b[31mSSH Error: ${err.message}\x1b[0m\r\n`));
             } else if (data.cmd && sshClient) {
-                // handled by shell listener
+                // handled by terminal listener
             }
         });
 

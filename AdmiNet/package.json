@@ -12,7 +12,7 @@
     "network-info": "^2.0.7",
     "network-scanner-js": "^1.1.5",
     "nmap": "^1.1.0",
-    "node": "^25.1.0",
+    "node": "^25.2.1",
     "node-libnmap": "^0.2.15",
     "node-nmap": "^4.0.0",
     "ping": "^1.0.0",
