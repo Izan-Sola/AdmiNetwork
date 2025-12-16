@@ -2,6 +2,33 @@ let selectedNetworkCIDR = 0;
 let allHostsToPing = [];
 let networkHostsCache = {};
 let regExpOS = new RegExp(`(Linux|Windows|Mac|Android)`, "i");
+let pingInterval = null;
+
+let matchedOS = null;
+let iconIMG = null;
+let openPorts = null;
+
+let searchText = '';
+let ipDivs = null;
+let nameDivs = null;
+let cardList = null;
+let regExp = null;
+let i = 0;
+
+let card = null;
+let inputName = null;
+let inputOs = null;
+let inputEdit = null;
+let hostIP = null;
+let opt = null;
+let cidrDivs = null;
+
+let t = '';
+let d = '';
+let l = 0;
+let barArray = [];
+
+import { insertLog } from "./logManager.js";
 
 //Consolas, 'Courier New', monospace
 //*Scan the target network
@@ -45,7 +72,7 @@ function networkScan(subnet = 0) {
 
 //* Append the hosts' and networks' info
 function appendHostsAndNetworks(hosts, networks) {
-
+    
     $('.cards').empty();
     //  console.log(hosts, networks)
     if (hosts != 0) {
@@ -75,7 +102,7 @@ function appendHostsAndNetworks(hosts, networks) {
                         </div>
             
                         <input type="text" class="os" value="${host.host_os}" disabled>
-                        <div class="ping">Last ping: &nbsp;<strong>${host.last_ping}</strong></div>
+                        <div class="ping">Last response: &nbsp;<strong>${host.last_ping}</strong></div>
             
                         <div class="bottom-row">
                             <div class="${(host.isAlive == 1) ? "status up" : "status down"}">
@@ -110,8 +137,6 @@ function appendHostsAndNetworks(hosts, networks) {
                     })
                 }
             }
-
-
         });
     }
     // console.log(networks[0])
@@ -135,7 +160,7 @@ function appendHostsAndNetworks(hosts, networks) {
     }
 
     $('.network-item').on('click', function () {
-        network = $(this).children().children().children()[1].textContent.trim()
+        const network = $(this).children().children().children()[1].textContent.trim()
         selectedNetworkCIDR = network
         loadNetwork(network)
     });
@@ -320,7 +345,7 @@ function updateHostStatus(status) {
                     ? (currentStatusDiv.addClass('status down').html("🔴 DOWN"))
                     : (currentStatusDiv.addClass('status up').html("🟢 UP"))
 
-                if  (status[y].status == 'up') lastPingDivs.eq(i).text(`${status[y].date} - ${status[y].time} ms`);
+                if  (status[y].status == 'up') lastPingDivs.eq(i).text(`Last response: ${status[y].date} - ${status[y].time} ms`);
 
                 const cidr = selectedNetworkCIDR || status[y].network_ip;
                 if (networkHostsCache[cidr]) {
@@ -345,7 +370,8 @@ function pingAllHosts() {
     })
         .then(res => res.json())
         .then(data => {
-            updateHostStatus(data.connectivityStatus)
+            const statusData = data.connectivityStatus;
+            updateHostStatus(statusData)   
         })
 }
 
@@ -434,5 +460,11 @@ function pausePing() {
 
 function resumePing() {
     if (!pingInterval)
-        pingInterval = setInterval(pingAllHosts, 10000);
+        pingInterval = setInterval(pingAllHosts, 15000);
 }
+window.scanAllNetworks = scanAllNetworks;
+window.networkScan = networkScan;
+window.editDeviceCardInfo = editDeviceCardInfo;
+window.saveDeviceCardInfo = saveDeviceCardInfo;
+window.removeDeviceCard = removeDeviceCard;
+window.removeNetwork = removeNetwork;

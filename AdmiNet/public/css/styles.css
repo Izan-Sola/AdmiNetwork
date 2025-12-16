@@ -609,15 +609,15 @@ h4.ports-services {
 }
 
 .Linux {
-  background-image: url('media/LinuxICON.png');
+  background-image: url('../media/LinuxICON.png');
   background-size: 100%;
 }
 .Windows {
-  background-image: url('media/WindowsICON.png');
+  background-image: url('../media/WindowsICON.png');
   background-size: 100%;
 }
 .Android {
-  background-image: url('media/AndroidICON.png');
+  background-image: url('../media/AndroidICON.png');
   background-size: 100%;
 }
 

@@ -1,3 +1,5 @@
+import { insertLog } from "./logManager";
+
 function connectSSH() {
     const card = $('.device-card.selected')[0];
     if (!card) return alert('Select a device first');
@@ -13,6 +15,13 @@ function connectSSH() {
     sessionStorage.setItem('ssh_pass', pass);
 
     window.location.href = 'console.html';
+
+    insertLog(
+        ip,
+        "ssh",
+        "info",
+        `User "${user}" has remotely connected to this device via SSH`,
+    )
 }
 
 function connectTelnet() {}
