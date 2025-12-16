@@ -27,6 +27,7 @@ function insertLog(IP, action, type, message) {
         timestamp: timestamp
     }
     ram_logs.push(new_log)
+    console.log(new_log)
 }
 
 function displayLog(IP, type) {

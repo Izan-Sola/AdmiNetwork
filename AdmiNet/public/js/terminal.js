@@ -10,6 +10,8 @@ const ip = sessionStorage.getItem('ssh_ip');
 const user = sessionStorage.getItem('ssh_user');
 const pass = sessionStorage.getItem('ssh_pass');
 
+import { insertLog } from "./logManager.js";
+
 function initTerminal() {
   term = new Terminal({ cursorBlink: true, fontFamily: 'Consolas, monospace' });
   term.open(document.getElementById('xterm'));
@@ -21,7 +23,12 @@ function initTerminal() {
   };
 
   ws.onmessage = e => {
-    term.write(e.data);
+    const data = JSON.parse(e.data)
+    term.write(data.message);
+
+    console.log(data)
+
+    insertLog(ip, "ssh", data.type, data.message)
   };
 
   term.onData(data => {
@@ -34,7 +41,7 @@ initTerminal();
 sendBtn.addEventListener('click', () => {
   const value = cmdInput.value.trim();
   if (!value || !term) return;
-  ws.send(JSON.stringify({ cmd: value + '\n' }));
+  ws.send(JSON.stringify({ message: value + '\n', type: "info" }));
   cmdInput.value = '';
 });
 

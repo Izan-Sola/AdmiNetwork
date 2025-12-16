@@ -1,5 +1,5 @@
 function openConnection() {
-    wsocket = new WebSocket('ws://localhost:3001');
+    const wsocket = new WebSocket('ws://localhost:3001');
     wsocket.onopen = function (event) {
         onOpen(event)
     }; wsocket.onclose = function (event) {
@@ -12,8 +12,8 @@ function openConnection() {
 
 }
 function onMessage(msgc) {
-    message = JSON.parse(msgc.data)
-    console.log(message.network)
+    const message = JSON.parse(msgc.data)
+    console.log(message)
 
     switch (message.type) {
         case 'scanComplete': $('#scan-completed').html('Completed scan for: ' + message.network); break;

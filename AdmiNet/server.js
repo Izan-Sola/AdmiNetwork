@@ -474,7 +474,24 @@ webSocketServer.on('request', function (req) {
                     password: data.pass
                 });
 
-                sshClient.on('error', err => clientConn.sendUTF(`\x1b[31mSSH Error: ${err.message}\x1b[0m\r\n`));
+                sshClient.on('error', err => 
+                clientConn.sendUTF(
+                    JSON.stringify({ message: `\x1b[31mSSH Error: ${err.message}\x1b[0m\r\n`, type: "error"})
+                ));
+              
+                /*
+                sshClient.on('error', err => {
+                    clientConn.sendUTF(
+                    JSON.stringify({})
+                    `\x1b[31mSSH Error: ${err.message}\x1b[0m\r\n`
+                    
+                    )
+                    
+                });
+              
+                
+                */ 
+                               //TODO: sshClient.on('ready', msg => {})
             } else if (data.cmd && sshClient) {
                 // handled by terminal listener
             }
@@ -611,7 +628,8 @@ async function createNetworkTableIfNotExists(tableName, con) {
             last_ping VARCHAR(32) NOT NULL DEFAULT "00:00:00",
             isAlive BOOLEAN DEFAULT FALSE,
             openPorts VARCHAR(2048) DEFAULT "none",
-            UNIQUE unique_host_ip (host_ip)
+            UNIQUE unique_host_ip (host_ip),
+             
         ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
         `
         await con.query(createTable)
