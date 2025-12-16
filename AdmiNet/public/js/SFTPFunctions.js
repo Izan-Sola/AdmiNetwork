@@ -122,3 +122,8 @@ async function uploadFile() {
     loadDir(remoteDir)
   } else alert('Upload failed')
 }
+
+window.connectSFTP = connectSFTP;
+window.renderFiles = renderFiles;
+window.uploadFile = uploadFile;
+window.loadDir = loadDir;

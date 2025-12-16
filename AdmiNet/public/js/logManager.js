@@ -37,8 +37,6 @@ function displayLog(IP, type) {
         else logsToDisplay = ram_logs.filter(log => log.IP == IP)
 
         console.log(logsToDisplay)
-       // allHostsToPing = allHostsToPing.filter(h => h.host_ip !== hostIP);
-
 }
 
 function getDate() {

@@ -1,4 +1,4 @@
-import { insertLog } from "./logManager";
+import { insertLog } from "./logManager.js";
 
 function connectSSH() {
     const card = $('.device-card.selected')[0];
@@ -43,3 +43,6 @@ $(document).ready(function () {
     });
     $('#loginBox button').on('click', connectSFTP);
 });
+
+window.showLogin = showLogin;
+window.connectSSH = connectSSH;
