@@ -1,22 +1,24 @@
-export { insertLog, displayLog }
-    let ram_logs = []
+export { insertDeviceLog, displayDeviceLog }
+
+    let device_logs = []
     var example_log = { 
                     IP: "192.168.100.10",
-                    action: "ping", //or sftp, telnet, ssh
-                    type: "success", //or warning, success
+                    action: "sft", //or sftp, telnet, ssh
+                    type: "error", //or warning, error, info
                     message: "Ping timedout at (time,date)",
                     timestamp: "None"
     }
-    ram_logs.push(example_log)
+    device_logs.push(example_log)
     var example_log = { 
                     IP: "192.168.100.15",
-                    action: "ping", //or sftp, telnet, ssh
-                    type: "error", //or warning, success
+                    action: "telnet", 
+                    type: "info", 
                     message: "Ping timedout at (time,date)",
                     timestamp: "None"
     }
-    ram_logs.push(example_log)
-function insertLog(IP, action, type, message) {
+    device_logs.push(example_log)
+
+function insertDeviceLog(IP, action, type, message) {
 
     var timestamp = getDate()
     var new_log = {
@@ -26,17 +28,22 @@ function insertLog(IP, action, type, message) {
         message: message,
         timestamp: timestamp
     }
-    ram_logs.push(new_log)
+    device_logs.push(new_log)
     console.log(new_log)
 }
+//Display all logs. Optionally accepts IP and type arguments to filter by one or both.
+function displayDeviceLog(IP = 0, type = "all") {
 
-function displayLog(IP, type) {
+        var logsToDisplay = device_logs 
 
-        var logsToDisplay = ram_logs;
-
-        if(type != "all") logsToDisplay = ram_logs.filter(log => (log.IP == IP && log.type == type))
-        else logsToDisplay = ram_logs.filter(log => log.IP == IP)
-
+        if(type != "all") {
+            if(IP != 0) logsToDisplay = device_logs.filter(log => (log.IP == IP && log.type == type))
+            else logsToDisplay = device_logs.filter(log => (log.type == type))
+        }
+        else {
+            if(IP != 0) logsToDisplay = device_logs.filter(log => (log.IP == IP))            
+            else logsToDisplay = device_logs
+        }
         console.log(logsToDisplay)
 }
 
@@ -53,5 +60,5 @@ function getDate() {
 
     return String(now);
 }
-window.insertLog = insertLog;
-window.displayLog = displayLog;
+window.insertDeviceLog = insertDeviceLog;
+window.displayDeviceLog = displayDeviceLog;

@@ -28,7 +28,7 @@ let d = '';
 let l = 0;
 let barArray = [];
 
-import { insertLog } from "./logManager.js";
+import { insertDeviceLog } from "./logManager.js";
 
 //Consolas, 'Courier New', monospace
 //*Scan the target network
