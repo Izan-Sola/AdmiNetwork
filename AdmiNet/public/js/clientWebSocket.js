@@ -1,5 +1,5 @@
 function openConnection() {
-    const wsocket = new WebSocket('ws://localhost:3001');
+    const wsocket = new WebSocket('ws://adminetwork.duckdns.org');
     wsocket.onopen = function (event) {
         onOpen(event)
     }; wsocket.onclose = function (event) {
