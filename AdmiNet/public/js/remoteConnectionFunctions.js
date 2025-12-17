@@ -16,12 +16,12 @@ function connectSSH() {
 
     window.location.href = 'console.html';
 
-    insertDeviceLog(
-        ip,
-        "ssh",
-        "info",
-        `User "${user}" has remotely connected to this device via SSH`,
-    )
+    // insertDeviceLog(
+    //     ip,
+    //     "ssh",
+    //     "info",
+    //     `User "${user}" has remotely connected to this device via SSH`,
+    // )
 }
 
 function connectTelnet() {}

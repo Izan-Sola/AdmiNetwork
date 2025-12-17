@@ -66,7 +66,7 @@ webSocketServer.on("request", function (req) {
         req.reject()
     }
 })
-//TODO: SSH CONNECTION, COLUMN FOR PORT AND SERVICE INFO...
+
 server.listen(3001, '0.0.0.0', () => {
     console.log('Server started')
 })
@@ -476,22 +476,14 @@ webSocketServer.on('request', function (req) {
 
                 sshClient.on('error', err => 
                 clientConn.sendUTF(
-                    JSON.stringify({ message: `\x1b[31mSSH Error: ${err.message}\x1b[0m\r\n`, type: "error"})
+                JSON.stringify({ message: `User "${data.user}" attempted connecting to this device via SSH.\n \x1b[31mSSH Error: ${err.message}\x1b[0m\r\n`, type: "error"})
                 ));
-              
-                /*
-                sshClient.on('error', err => {
+
+                sshClient.on('ready', msg => {
+                    console.log(msg)
                     clientConn.sendUTF(
-                    JSON.stringify({})
-                    `\x1b[31mSSH Error: ${err.message}\x1b[0m\r\n`
-                    
-                    )
-                    
-                });
-              
-                
-                */ 
-                               //TODO: sshClient.on('ready', msg => {})
+                    JSON.stringify({ message: `"${data.user}" has successfully connected to this device via SHH`, type: "info"}))
+                })
             } else if (data.cmd && sshClient) {
                 // handled by terminal listener
             }
@@ -507,6 +499,7 @@ webSocketServer.on('request', function (req) {
 
 const SftpClient = require('ssh2-sftp-client');
 const multer = require('multer');
+const { client } = require('websocket')
 const upload = multer({ dest: 'uploads/' });
 
 //* List the current directory
@@ -527,6 +520,7 @@ app.post('/api/list', async (req, res) => {
         const files = await sftp.list(dir || '.');
         await sftp.end();
         res.json({ success: true, files });
+
     } catch (err) {
         console.error('SFTP list error:', err);
         res.json({ success: false, error: err.message });
