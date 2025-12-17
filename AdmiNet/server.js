@@ -57,7 +57,7 @@ const webSocketServer = new WebSocketServer({
 
 webSocketServer.on("request", function (req) {
     if (req.origin === 'http://localhost:3001' || req.origin === 'http://172.30.199.117:3001'
-        || req.origin === 'http:adminetwork.duckdns.org'
+        || req.origin === 'http://adminetwork.duckdns.org'
     ) {
         const connection = req.accept(null, req.origin)
         connection.on("close", function () {
