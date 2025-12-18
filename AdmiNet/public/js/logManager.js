@@ -51,14 +51,12 @@ function displayLog({ IP = null, type = "all", action = "all" } = {}) {
     })
     .then(res => res.json())
     .then(data => {
-        const log = data.tempLogs
         const logsToDisplay = data.tempLogs.filter(log => {
             if (IP !== null && log.IP !== IP) return false;
             if (type !== "all" && log.type !== type) return false;
             if (action !== "all" && log.action !== type) return false;
             return true;
         });
-
         console.log(logsToDisplay);
     });
 }

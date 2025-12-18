@@ -35,7 +35,6 @@ function initTerminal() {
 
   ws.onclose = e => {
     console.log("WS CLOSE", e);
-    session_log = [];
   };
 
 ws.onmessage = e => {
@@ -61,7 +60,6 @@ ws.onmessage = e => {
 
 initTerminal();
 
-/* OPTIONAL input box support */
 sendBtn.addEventListener('click', () => {
   const value = cmdInput.value;
   if (!value || !ws) return;
@@ -76,5 +74,6 @@ cmdInput.addEventListener('keydown', e => {
 });
 
 window.addEventListener("beforeunload", () => {
-  insertLog(ip, "ssh", "info", session_log);
+  insertLog(ip, "ssh", "info", "SSH session ended. Commands performed: "+session_log);
+  session_log = [];
 });

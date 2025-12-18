@@ -15,6 +15,8 @@ const ping = require('ping');
 //nmap.nmapLocation = "/usr/bin/nmap"
 nmap.nmapLocation = "C:/Program Files (x86)/Nmap/nmap.exe"
 
+let tempLogs = []
+
 let clientConn = null;
 const rateLimit = rateLimiter({
     windowMs: 2 * 60 * 1000, // 2 minutes
@@ -47,7 +49,7 @@ const NetWorkScanner = require('network-scanner-js')
 const netScan = new NetWorkScanner()
 require('events').EventEmitter.defaultMaxListeners = 50
 const networkInfo = require('network-info')
-const { table } = require('console')
+const { table, timeStamp } = require('console')
 
 //? <------ WEBSOCKET ------>
 const webSocketServer = new WebSocketServer({
@@ -476,16 +478,33 @@ webSocketServer.on('request', function (req) {
                     password: data.pass
                 });
 
-                sshClient.on('error', err => 
-                clientConn.sendUTF(
-                JSON.stringify({ message: `User "${data.user}" attempted connecting to this device via SSH.\n \x1b[31mSSH Error: ${err.message}\x1b[0m\r\n`, type: "error"})
-                ));
-
-                sshClient.on('ready', msg => {
-                    console.log(msg)
-                    clientConn.sendUTF(
-                    JSON.stringify({ message: `"${data.user}" has successfully connected to this device via SHH`, type: "info"}))
+                sshClient.on('error', err => {           
+                // clientConn.sendUTF(
+                // JSON.stringify({ 
+                // message: `User "${data.user}" attempted connecting to this device via SSH.\n \x1b[31mSSH Error: 
+                // ${err.message}\x1b[0m\r\n`, type: "error"}))            
+                tempLogs.push({
+                    ip: data.ip,
+                    action: "ssh",
+                    type: "error",
+                    message: `User "${data.user}" attempted connecting to this device via SSH.\n 
+                    \x1b[31mSSH Error: ${err.message}\x1b[0m\r\n`,
+                    timestamp: getDate()
                 })
+            });
+
+            sshClient.on('ready', msg => {
+                console.log(msg)
+                clientConn.sendUTF(
+                JSON.stringify({ message: `"${data.user}" has successfully connected to this device via SHH`, type: "info"}))
+                tempLogs.push({
+                    ip: data.ip,
+                    action: "ssh",
+                    type: error,
+                    message: `"${data.user}" has successfully connected to this device via SHH`,
+                    timeStamp: getDate()
+                })
+            })
             } else if (data.cmd && sshClient) {
                 // handled by terminal listener
             }
@@ -581,8 +600,6 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 //? <------ UTILITY FUNCTIONS ------>
 
 //*
-
-tempLogs = []
 
 app.post('/updateLog', async (req, res) => {
     tempLogs.push(req.body.log)
