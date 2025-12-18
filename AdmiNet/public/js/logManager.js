@@ -1,6 +1,7 @@
-export { insertDeviceLog, displayDeviceLog }
+export { insertLog, displayLog }
 
     let device_logs = []
+
     var example_log = { 
                     IP: "192.168.100.10",
                     action: "sft", //or sftp, telnet, ssh
@@ -18,7 +19,7 @@ export { insertDeviceLog, displayDeviceLog }
     }
     device_logs.push(example_log)
 
-function insertDeviceLog(IP, action, type, message) {
+function insertLog(IP, action, type, message) {
 
     var timestamp = getDate()
     var new_log = {
@@ -30,22 +31,38 @@ function insertDeviceLog(IP, action, type, message) {
     }
     device_logs.push(new_log)
     console.log(new_log)
-}
-//Display all logs. Optionally accepts IP and type arguments to filter by one or both.
-function displayDeviceLog(IP = 0, type = "all") {
 
-        var logsToDisplay = device_logs 
-
-        if(type != "all") {
-            if(IP != 0) logsToDisplay = device_logs.filter(log => (log.IP == IP && log.type == type))
-            else logsToDisplay = device_logs.filter(log => (log.type == type))
-        }
-        else {
-            if(IP != 0) logsToDisplay = device_logs.filter(log => (log.IP == IP))            
-            else logsToDisplay = device_logs
-        }
-        console.log(logsToDisplay)
+    fetch('/updateLog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ log: new_log })
+    })
+        // .then(res => res.json())
+        // .then(data => {
+        //     console.log("Successfully updated logs!")
+        // })
 }
+//Display all logs. Optionally accepts filter options
+function displayLog({ IP = null, type = "all", action = "all" } = {}) {
+    fetch('/retrieveLog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ empty: "" })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const log = data.tempLogs
+        const logsToDisplay = data.tempLogs.filter(log => {
+            if (IP !== null && log.IP !== IP) return false;
+            if (type !== "all" && log.type !== type) return false;
+            if (action !== "all" && log.action !== type) return false;
+            return true;
+        });
+
+        console.log(logsToDisplay);
+    });
+}
+
 
 function getDate() {
     var now = new Date();
@@ -60,5 +77,5 @@ function getDate() {
 
     return String(now);
 }
-window.insertDeviceLog = insertDeviceLog;
-window.displayDeviceLog = displayDeviceLog;
+window.insertLog = insertLog;
+window.displayLog = displayLog;

@@ -11,7 +11,7 @@ const ip = sessionStorage.getItem('ssh_ip');
 const user = sessionStorage.getItem('ssh_user');
 const pass = sessionStorage.getItem('ssh_pass');
 
-import { insertDeviceLog } from "./logManager.js";
+import { insertLog } from "./logManager.js";
 
 function initTerminal() {
   term = new Terminal({
@@ -38,37 +38,13 @@ function initTerminal() {
     session_log = [];
   };
 
-  // ws.onmessage = async e => {
-  //   console.log("RECEIVED:", e.data);
-
-  //   let text;
-
-  //   if (e.data instanceof Blob) {
-  //     text = await e.data.text();
-  //   } else {
-  //     text = e.data;
-  //   }
-
-  //   try {
-  //     const data = JSON.parse(text);
-  //     term.write(data.message ?? "");
-  //     if (data.type === "error") {
-  //       insertDeviceLog(ip, "ssh", data.type, data.message);
-  //     } else {
-  //       session_log.push(data.message);
-  //     }
-  //   } catch {
-  //     term.write(text);
-  //     session_log.push(text);
-  //   }
-  // };
 ws.onmessage = e => {
   try {
     const data = JSON.parse(e.data);
     term.write(data.message);
 
     if (data.type === "error") {
-      insertDeviceLog(ip, "ssh", data.type, data.message);
+      insertLog(ip, "ssh", data.type, data.message);
     } else {
       session_log.push(data.message);
     }
@@ -77,10 +53,8 @@ ws.onmessage = e => {
     session_log.push(e.data);
   }
 };
-
-
   term.onData(data => {
-    term.write(data);              // local echo
+    term.write(data);          
     ws.send(JSON.stringify({ cmd: data }));
   });
 }
@@ -102,5 +76,5 @@ cmdInput.addEventListener('keydown', e => {
 });
 
 window.addEventListener("beforeunload", () => {
-  insertDeviceLog(ip, "ssh", "info", session_log);
+  insertLog(ip, "ssh", "info", session_log);
 });

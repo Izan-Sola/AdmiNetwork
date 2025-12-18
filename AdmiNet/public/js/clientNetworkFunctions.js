@@ -28,7 +28,7 @@ let d = '';
 let l = 0;
 let barArray = [];
 
-import { insertDeviceLog } from "./logManager.js";
+import { insertLog } from "./logManager.js";
 
 //Consolas, 'Courier New', monospace
 //*Scan the target network
@@ -46,6 +46,7 @@ function networkScan(subnet = 0) {
     })
         .then(res => res.json())
         .then(data => {
+
             const networks = data.networks;
 
             fetch('/loadNetworkData', {
@@ -66,6 +67,12 @@ function networkScan(subnet = 0) {
         })
         .catch(err => {
             console.error(err);
+            insertLog(
+                subnet,
+                "network_scan",
+                "error",
+                `Network scan failed for: ${subnet}. ERROR: ${err}`
+            )
             resumePing();
         });
 }
@@ -235,6 +242,13 @@ function scanAllNetworks() {
                             $('#cover').addClass('hidden');
                             $('#scan-in-progress').addClass('hidden');
                             resumePing();
+
+                            insertLog(
+                                subnet,
+                                "network_scan",
+                                "error",
+                                `Network scan failed for: ${subnet}. ERROR: ${err}`
+                            )
                         }
                     });
             });

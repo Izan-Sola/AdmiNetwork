@@ -12,8 +12,8 @@ const ip = require('ip')
 const nmap = require('node-nmap')
 
 const ping = require('ping');
-nmap.nmapLocation = "/usr/bin/nmap"
-//nmap.nmapLocation = "C:/Program Files (x86)/Nmap/nmap.exe"
+//nmap.nmapLocation = "/usr/bin/nmap"
+nmap.nmapLocation = "C:/Program Files (x86)/Nmap/nmap.exe"
 
 let clientConn = null;
 const rateLimit = rateLimiter({
@@ -579,6 +579,22 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 
 
 //? <------ UTILITY FUNCTIONS ------>
+
+//*
+
+tempLogs = []
+
+app.post('/updateLog', async (req, res) => {
+    tempLogs.push(req.body.log)
+    console.log(req.body.log)
+    res.sendStatus(200);
+});
+app.post('/retrieveLog', async (req, res) => {
+    console.log(tempLogs)
+    res.json({ tempLogs })
+})
+
+
 
 //* Connect to database (Now returns a connection from the pool)
 async function getDatabaseConnection() {

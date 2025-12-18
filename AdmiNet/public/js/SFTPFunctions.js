@@ -1,7 +1,7 @@
 let username, password
 let currentDir = '.'
 let ip = ""
-import { insertDeviceLog } from "./logManager.js"
+import { insertLog } from "./logManager.js"
 
 async function connectSFTP() {
   const card = $('.device-card.selected')[0];
@@ -22,7 +22,7 @@ async function connectSFTP() {
   if (!data.success) {
     document.getElementById('loginError').textContent = '❌ ' + data.error
 
-    insertDeviceLog( 
+    insertLog( 
         ip,
         "sftp",
         "error",
@@ -48,7 +48,7 @@ async function loadDir(dir) {
   const data = await res.json()
   if (!data.success) {
     alert('Error: ' + data.error)
-    insertDeviceLog(
+    insertLog(
       ip,
       "sftp",
       "error",
@@ -56,7 +56,7 @@ async function loadDir(dir) {
     );
     return
   }
-  insertDeviceLog(
+  insertLog(
     ip,
     "sftp",
     "info",
@@ -116,7 +116,7 @@ function renderFiles(files, dir) {
           a.href = URL.createObjectURL(blob)
           a.download = f.name
           a.click()
-          insertDeviceLog(
+          insertLog(
             ip,
             "sftp",
             "info",
@@ -152,7 +152,7 @@ async function uploadFile() {
   if (res.ok) {
     alert('Upload complete!')
     loadDir(remoteDir)
-    insertDeviceLog(
+    insertLog(
       ip,
       "sftp",
       "info",

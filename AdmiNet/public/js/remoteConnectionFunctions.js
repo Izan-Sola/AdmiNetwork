@@ -1,4 +1,4 @@
-import { insertDeviceLog } from "./logManager.js";
+import { insertLog } from "./logManager.js";
 
 function connectSSH() {
     const card = $('.device-card.selected')[0];
@@ -16,7 +16,7 @@ function connectSSH() {
 
     window.location.href = 'console.html';
 
-    // insertDeviceLog(
+    // insertLog(
     //     ip,
     //     "ssh",
     //     "info",
