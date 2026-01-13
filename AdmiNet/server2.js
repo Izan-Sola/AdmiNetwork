@@ -799,3 +799,154 @@ initializeDataFile().then(() => {
 }).catch(err => {
     console.error('Failed to initialize data file:', err);
 });
+
+
+
+//? <----- SSH ----->
+
+webSocketServer.on('request', function (req) {
+    if (req.resource === '/ssh') {
+        //   const connection = req.accept(null, req.origin);
+        let sshClient;
+
+        clientConn.on('message', async function (message) {
+            const data = JSON.parse(message.utf8Data);
+
+            if (data.ip && data.user && data.pass) {
+                sshClient = new ssh.Client();
+                sshClient.on('ready', () => {
+                    clientConn.sendUTF('\x1b[32mSSH Connected!\x1b[0m\r\n$ ');
+                    sshClient.shell((err, stream) => {
+                        if (err) return clientConn.sendUTF('Error opening shell\r\n');
+                        stream.on('data', chunk => clientConn.sendUTF(chunk.toString()));
+                        stream.on('close', () => sshClient.end());
+                        clientConn.on('message', msg => {
+                            const cmdData = JSON.parse(msg.utf8Data);
+                            if (cmdData.cmd) stream.write(cmdData.cmd);
+                        });
+                    });
+                }).connect({
+                    host: data.ip,
+                    port: 22,
+                    username: data.user,
+                    password: data.pass
+                });
+
+                sshClient.on('error', err => {           
+                // clientConn.sendUTF(
+                // JSON.stringify({ 
+                // message: `User "${data.user}" attempted connecting to this device via SSH.\n \x1b[31mSSH Error: 
+                // ${err.message}\x1b[0m\r\n`, type: "error"}))            
+                tempLogs.push({
+                    ip: data.ip,
+                    action: "ssh",
+                    type: "error",
+                    message: `User "${data.user}" attempted connecting to this device via SSH.\n 
+                    \x1b[31mSSH Error: ${err.message}\x1b[0m\r\n`,
+                    timestamp: getDate()
+                })
+            });
+
+            sshClient.on('ready', msg => {
+                console.log(msg)
+                clientConn.sendUTF(
+                JSON.stringify({ message: `"${data.user}" has successfully connected to this device via SHH`, type: "info"}))
+                tempLogs.push({
+                    ip: data.ip,
+                    action: "ssh",
+                    type: error,
+                    message: `"${data.user}" has successfully connected to this device via SHH`,
+                    timeStamp: getDate()
+                })
+            })
+            } else if (data.cmd && sshClient) {
+                // handled by terminal listener
+            }
+        });
+
+        clientConn.on('close', () => { if (sshClient) sshClient.end(); });
+    } else {
+        // req.reject();
+    }
+});
+
+//? <----- SFTP ----->
+
+const SftpClient = require('ssh2-sftp-client');
+const multer = require('multer');
+const { client } = require('websocket')
+const upload = multer({ dest: 'uploads/' });
+
+//* List the current directory
+app.post('/api/list', async (req, res) => {
+    const { username, password, dir } = req.body;
+    const ip = req.body.ip || sessionStorage.getItem('ssh_ip'); // optional dynamic IP from client
+
+    if (!username || !password) return res.json({ success: false, error: 'Missing credentials' });
+
+    const sftp = new SftpClient();
+    try {
+        await sftp.connect({
+            host: ip,
+            port: 22,
+            username,
+            password
+        });
+        const files = await sftp.list(dir || '.');
+        await sftp.end();
+        res.json({ success: true, files });
+
+    } catch (err) {
+        console.error('SFTP list error:', err);
+        res.json({ success: false, error: err.message });
+    }
+});
+
+//* Download selected file
+//TODO: Compress and download folders
+app.post('/api/download', async (req, res) => {
+    const { username, password, filePath, ip } = req.body;
+    if (!filePath) return res.status(400).send('Missing file path');
+
+    const sftp = new SftpClient();
+    const tempPath = path.join(__dirname, 'uploads', path.basename(filePath));
+
+    try {
+        await sftp.connect({
+            host: ip,
+            port: 22,
+            username,
+            password
+        });
+        await sftp.fastGet(filePath, tempPath);
+        await sftp.end();
+        res.download(tempPath);
+    } catch (err) {
+        console.error('SFTP download error:', err);
+        res.status(500).send('Error downloading file');
+    }
+});
+
+//* Upload stuff
+app.post('/api/upload', upload.single('file'), async (req, res) => {
+    const { username, password, remoteDir, ip } = req.body;
+    const localFilePath = req.file.path;
+    const remoteFileName = req.file.originalname;
+
+    const sftp = new SftpClient();
+    try {
+        await sftp.connect({
+            host: ip,
+            port: 22,
+            username,
+            password
+        });
+        await sftp.fastPut(localFilePath, path.posix.join(remoteDir, remoteFileName));
+        await sftp.end();
+        res.sendStatus(200);
+    } catch (err) {
+        console.error('SFTP upload error:', err);
+        res.status(500).json({ error: 'Upload failed' });
+    }
+});
+

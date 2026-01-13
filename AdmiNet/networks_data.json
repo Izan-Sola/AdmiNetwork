@@ -101,7 +101,7 @@
           "host_name": "unknown",
           "host_os": "Microsoft Windows 11 21H2",
           "openPorts": "[{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"}]",
-          "last_ping": "01/13/2026 at 09:31:02",
+          "last_ping": "01/13/2026 at 09:48:15",
           "isAlive": true,
           "firstSeen": "01/13/2026 at 09:31:02",
           "lastUpdated": "01/13/2026 at 09:31:02"
@@ -341,8 +341,8 @@
           "host_name": "unknown",
           "host_os": "Microsoft Windows 11 21H2",
           "openPorts": "[{\"port\":902,\"protocol\":\"tcp\",\"service\":\"iss-realsecure\",\"method\":\"table\"},{\"port\":912,\"protocol\":\"tcp\",\"service\":\"apex-mesh\",\"method\":\"table\"},{\"port\":5357,\"protocol\":\"tcp\",\"service\":\"wsdapi\",\"method\":\"table\"}]",
-          "last_ping": "01/13/2026 at 09:31:02",
-          "isAlive": true,
+          "last_ping": "01/13/2026 at 09:48:25",
+          "isAlive": false,
           "firstSeen": "01/13/2026 at 09:31:02",
           "lastUpdated": "01/13/2026 at 09:31:02"
         },
@@ -378,7 +378,7 @@
         }
       ],
       "createdAt": "01/13/2026 at 09:31:02",
-      "lastUpdated": "01/13/2026 at 09:31:02"
+      "lastUpdated": "01/13/2026 at 09:48:25"
     }
   ]
 }
