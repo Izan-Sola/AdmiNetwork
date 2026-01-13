@@ -16,12 +16,6 @@ function connectSSH() {
 
     window.location.href = 'console.html';
 
-    // insertLog(
-    //     ip,
-    //     "ssh",
-    //     "info",
-    //     `User "${user}" has remotely connected to this device via SSH`,
-    // )
 }
 
 function connectTelnet() {}

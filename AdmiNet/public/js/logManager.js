@@ -4,7 +4,7 @@ export { insertLog, displayLog }
 
     var example_log = { 
                     IP: "192.168.100.10",
-                    action: "sft", //or sftp, telnet, ssh
+                    action: "sftp", //or sftp, telnet, ssh
                     type: "error", //or warning, error, info
                     message: "Ping timedout at (time,date)",
                     timestamp: "None"
@@ -42,7 +42,7 @@ function insertLog(IP, action, type, message) {
         //     console.log("Successfully updated logs!")
         // })
 }
-//Display all logs. Optionally accepts filter options
+//* Display all logs. Optionally accepts filter options
 function displayLog({ IP = null, type = "all", action = "all" } = {}) {
     fetch('/retrieveLog', {
         method: 'POST',
