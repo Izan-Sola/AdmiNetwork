@@ -141,111 +141,13 @@ async function findOrCreateNetwork(networkInfo) {
     return networkInfo.cidr;
 }
 
-// Ensure network exists before adding hosts
-async function ensureNetworkExists(networkCIDR, networkInfo = null) {
-    const network = await findNetworkByCIDR(networkCIDR);
-    if (!network) {
-        // Create a minimal network entry
-        const networkParts = networkCIDR.split('/');
-        const networkIP = networkParts[0];
-        const subnetMask = parseInt(networkParts[1]);
-        
-        // Calculate netmask from CIDR
-        const mask = [];
-        for (let i = 0; i < 4; i++) {
-            const bits = Math.min(8, Math.max(0, subnetMask - i * 8));
-            mask.push(bits ? 256 - Math.pow(2, 8 - bits) : 0);
-        }
-        const netmask = mask.join('.');
-        
-        const newNetworkInfo = networkInfo || {
-            interface: 'Unknown',
-            ip: networkIP,
-            netmask: netmask,
-            cidr: networkCIDR
-        };
-        
-        await findOrCreateNetwork(newNetworkInfo);
-        console.log(`Auto-created network: ${networkCIDR}`);
-    }
-}
-
-// Process host data from NMAP to ensure it's properly structured
-function processHostData(hostData) {
-    // Deep clone the hostData to avoid reference issues
-    const processed = JSON.parse(JSON.stringify(hostData));
-    
-    // Ensure all required fields exist
-    return {
-        ip: processed.ip || '',
-        hostname: processed.hostname || 'unknown',
-        osNmap: processed.osNmap || 'unknown',
-        openPorts: Array.isArray(processed.openPorts) ? processed.openPorts : []
-    };
-}
-
-// Add or update host in network
-async function addOrUpdateHost(networkCIDR, rawHostData) {
-    // Process the host data first
-    const hostData = processHostData(rawHostData);
-    
-    // First ensure the network exists
-    await ensureNetworkExists(networkCIDR);
-    
+// Add multiple hosts at once
+async function addHosts(networkCIDR, hostsDataArray) {
     const data = await loadNetworksData();
     const networkIndex = data.networks.findIndex(n => n.cidr === networkCIDR);
     
     if (networkIndex === -1) {
-        throw new Error(`Network ${networkCIDR} not found even after attempting to create it`);
-    }
-    
-    const network = data.networks[networkIndex];
-    const existingHostIndex = network.hosts.findIndex(h => h.host_ip === hostData.ip);
-    
-    if (existingHostIndex >= 0) {
-        // Update existing host - create a new object to avoid reference issues
-        const existingHost = network.hosts[existingHostIndex];
-        network.hosts[existingHostIndex] = {
-            host_ip: hostData.ip,
-            host_name: hostData.hostname || existingHost.host_name,
-            host_os: hostData.osNmap || existingHost.host_os,
-            openPorts: JSON.stringify(hostData.openPorts || []),
-            last_ping: existingHost.last_ping || getDate(),
-            isAlive: existingHost.isAlive !== undefined ? existingHost.isAlive : true,
-            firstSeen: existingHost.firstSeen || getDate(),
-            lastUpdated: getDate()
-        };
-        console.log(`Updated host: ${hostData.ip} in network ${networkCIDR}`);
-    } else {
-        // Add new host - create a fresh object
-        const newHost = {
-            host_ip: hostData.ip,
-            host_name: hostData.hostname || "unknown",
-            host_os: hostData.osNmap || "unknown",
-            openPorts: JSON.stringify(hostData.openPorts || []),
-            last_ping: getDate(),
-            isAlive: true,
-            firstSeen: getDate(),
-            lastUpdated: getDate()
-        };
-        network.hosts.push(newHost);
-        console.log(`Added new host: ${hostData.ip} to network ${networkCIDR} (total: ${network.hosts.length})`);
-    }
-    
-    network.lastUpdated = getDate();
-    await saveNetworksData(data);
-}
-
-// Add multiple hosts at once (to avoid race conditions)
-async function addMultipleHosts(networkCIDR, hostsDataArray) {
-    // First ensure the network exists
-    await ensureNetworkExists(networkCIDR);
-    
-    const data = await loadNetworksData();
-    const networkIndex = data.networks.findIndex(n => n.cidr === networkCIDR);
-    
-    if (networkIndex === -1) {
-        throw new Error(`Network ${networkCIDR} not found even after attempting to create it`);
+        throw new Error(`Network ${networkCIDR} not found. Network should have been created before adding hosts.`);
     }
     
     const network = data.networks[networkIndex];
@@ -257,9 +159,7 @@ async function addMultipleHosts(networkCIDR, hostsDataArray) {
     });
     
     // Process each new host
-    for (const rawHostData of hostsDataArray) {
-        const hostData = processHostData(rawHostData);
-        
+    for (const hostData of hostsDataArray) {
         if (existingHostMap.has(hostData.ip)) {
             // Update existing host
             const existingHost = existingHostMap.get(hostData.ip);
@@ -330,10 +230,7 @@ async function updateHostStatus(result) {
     
     // Find network by checking if result.network_ip contains any network CIDR
     const networkIndex = data.networks.findIndex(n => {
-        // Try different ways to match the network
-        return result.network_ip === n.cidr || 
-               result.network_ip.includes(n.cidr.split('/')[0]) ||
-               n.cidr.includes(result.network_ip.split('.')[0]);
+        return result.network_ip === n.cidr
     });
     
     if (networkIndex === -1) {
@@ -399,28 +296,10 @@ async function removeNetwork(networkCIDR) {
 app.post('/getAllNetworks', async (req, res) => {
     await initializeDataFile();
     
-    const networks = await getNetworksInfo({
-        scanHosts: true
-    });
-    
-    // Save the network metadata concurrently
-    const savePromises = networks.map(network => findOrCreateNetwork(network));
-    await Promise.allSettled(savePromises);
-
-    res.json({ networks });
-});
-
-//* Gets the info of 1 or all network INTERFACES
-async function getNetworksInfo(options = {}) {
-    const {
-        targetCIDR = null,
-        scanHosts = false
-    } = options;
-
+    // Get all network interfaces
     const interfaces = os.networkInterfaces();
     const networks = [];
-    const scanPromises = [];
-
+    
     for (const interfaceName in interfaces) {
         for (const iface of interfaces[interfaceName]) {
             if (iface.family === 'IPv4' && !iface.internal) {
@@ -435,60 +314,74 @@ async function getNetworksInfo(options = {}) {
                     }));
                 }
                 
-                if (targetCIDR) {
-                    const [targetHostIP] = targetCIDR.split('/');
-                    if (iface.address === targetHostIP) {
-                        const networkSubnet = ip.cidrSubnet(targetCIDR);
-                        const networkCIDR = `${networkSubnet.networkAddress}/${targetCIDR.split('/')[1]}`;
-
-                        const networkInfo = {
-                            interface: interfaceName,
-                            ip: iface.address,
-                            netmask: iface.netmask,
-                            cidr: networkCIDR,
-                            hostCIDR: targetCIDR
-                        };
-                        networks.push(networkInfo);
-
-                        if (scanHosts) {
-                            scanPromises.push(retrieveHostInfo(networkCIDR, networkInfo));
-                        }
-                    }
-                } else {
-                    const networkInfo = {
-                        interface: interfaceName,
-                        ip: iface.address,
-                        netmask: iface.netmask,
-                        cidr: interfaceCIDR
-                    };
-                    networks.push(networkInfo);
-                    if (scanHosts) {
-                        scanPromises.push(retrieveHostInfo(interfaceCIDR, networkInfo));
-                    }
-                }
+                const networkInfo = {
+                    interface: interfaceName,
+                    ip: iface.address,
+                    netmask: iface.netmask,
+                    cidr: interfaceCIDR
+                };
+                networks.push(networkInfo);
             }
         }
     }
-
-    if (scanHosts && scanPromises.length > 0) {
-        console.log(`Waiting for ${scanPromises.length} network scans to complete...`);
-        const scanResults = await Promise.allSettled(scanPromises);
-        scanResults.forEach(result => {
-            if (result.status === 'rejected') {
-                console.error('One network scan failed:', result.reason);
-            } else if (result.status === 'fulfilled') {
-                console.log('Scan completed:', result.value);
-            }
-        });
-        console.log('All network scans and host saves are complete.');
+    
+    console.log(`Found ${networks.length} network interfaces`);
+    
+    // Create all networks sequentially
+    const createdNetworks = [];
+    for (const network of networks) {
+        try {
+            await findOrCreateNetwork(network);
+            createdNetworks.push(network);
+            console.log(`Created network: ${network.cidr}`);
+        } catch (error) {
+            console.error(`Failed to create network ${network.cidr}:`, error.message);
+        }
     }
-
-    if (targetCIDR) {
-        return networks.length > 0 ? networks : [];
-    } else {
-        return networks;
+    
+    // For each network, scan its hosts sequentially
+    for (const network of createdNetworks) {
+        try {
+            console.log(`Starting NMAP scan for network: ${network.cidr}`);
+            await new Promise((resolve, reject) => {
+                const scan = new nmap.NmapScan(network.cidr, "-O");
+                
+                scan.once('complete', async (data) => {
+                    if (clientConn) {
+                        clientConn.sendUTF(JSON.stringify({ 
+                            type: 'scanComplete', 
+                            msg: '', 
+                            network: network.cidr 
+                        }));
+                    }
+                    
+                    console.log(`NMAP found ${data.length} hosts in ${network.cidr}. Saving hosts...`);
+                    
+                    try {
+                        // Network should exist at this point
+                        await addHosts(network.cidr, data);
+                        console.log(`Successfully saved ${data.length} hosts for network ${network.cidr}`);
+                        resolve({ network: network.cidr, hosts: data.length, success: true });
+                    } catch (error) {
+                        console.error(`Error saving hosts for ${network.cidr}:`, error);
+                        reject(error);
+                    }
+                });
+                
+                scan.once('error', (err) => {
+                    console.error(`NMAP scan error for ${network.cidr}:`, err);
+                    reject(err);
+                });
+                
+                scan.startScan();
+            });
+        } catch (error) {
+            console.error(`Failed to scan network ${network.cidr}:`, error.message);
+        }
     }
-}
+    
+    res.json({ networks: createdNetworks });
+});
 
 //* Endpoint for scanning the specified network
 app.post('/scanNetwork', async (req, res) => {
@@ -498,90 +391,92 @@ app.post('/scanNetwork', async (req, res) => {
         return res.status(400).json({ error: 'Subnet is required' });
     }
     
-    const networks = await getNetworksInfo({
-        targetCIDR: req.body.subnet,
-        scanHosts: true
-    });
+    const targetCIDR = req.body.subnet;
+    const interfaces = os.networkInterfaces();
+    let networkInfo = null;
     
-    if (networks && networks.length > 0) {
-        await findOrCreateNetwork(networks[0]);
-        res.json({ networks });
-    } else {
-        // Even if we didn't find a matching interface, we can still scan the network
-        console.log(`No matching interface found for ${req.body.subnet}, but will scan it anyway.`);
-        
-        // Create a network entry for this CIDR
-        const networkParts = req.body.subnet.split('/');
-        const networkInfo = {
+    // Find matching interface
+    for (const interfaceName in interfaces) {
+        for (const iface of interfaces[interfaceName]) {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                const [targetHostIP] = targetCIDR.split('/');
+                if (iface.address === targetHostIP) {
+                    const networkSubnet = ip.cidrSubnet(targetCIDR);
+                    const networkCIDR = `${networkSubnet.networkAddress}/${targetCIDR.split('/')[1]}`;
+                    
+                    networkInfo = {
+                        interface: interfaceName,
+                        ip: iface.address,
+                        netmask: iface.netmask,
+                        cidr: networkCIDR,
+                        hostCIDR: targetCIDR
+                    };
+                    break;
+                }
+            }
+        }
+        if (networkInfo) break;
+    }
+    
+    if (!networkInfo) {
+        // No matching interface found
+        console.log(`No matching interface found for ${targetCIDR}, creating network entry.`);
+        const networkParts = targetCIDR.split('/');
+        networkInfo = {
             interface: 'Unknown',
             ip: networkParts[0],
-            netmask: '255.255.255.0', // Default assumption
-            cidr: req.body.subnet
+            netmask: '255.255.255.0',
+            cidr: targetCIDR
         };
+    }
+    
+    //Create the network and scan the hosts
+    await findOrCreateNetwork(networkInfo);
+    console.log(`Created network: ${networkInfo.cidr}`);
+    
+    try {
+        await new Promise((resolve, reject) => {
+            const scan = new nmap.NmapScan(targetCIDR, "-O");
+            
+            scan.once('complete', async (data) => {
+                if (clientConn) {
+                    clientConn.sendUTF(JSON.stringify({ 
+                        type: 'scanComplete', 
+                        msg: '', 
+                        network: targetCIDR 
+                    }));
+                }
+                
+                console.log(`NMAP found ${data.length} hosts in ${targetCIDR}. Saving hosts...`);
+                
+                try {
+                    await addHosts(targetCIDR, data);
+                    console.log(`Successfully saved ${data.length} hosts for network ${targetCIDR}`);
+                    resolve({ network: targetCIDR, hosts: data.length, success: true });
+                } catch (error) {
+                    console.error(`Error saving hosts for ${targetCIDR}:`, error);
+                    reject(error);
+                }
+            });
+            
+            scan.once('error', (err) => {
+                console.error(`NMAP scan error for ${targetCIDR}:`, err);
+                reject(err);
+            });
+            
+            scan.startScan();
+        });
         
-        await findOrCreateNetwork(networkInfo);
-        
-        // Scan the network
-        await retrieveHostInfo(req.body.subnet, networkInfo);
-        
-        res.json({ networks: [networkInfo] });
+        res.json({ networks: [networkInfo], success: true });
+    } catch (error) {
+        console.error('Network scan failed:', error);
+        res.status(500).json({ 
+            error: 'Network scan failed', 
+            details: error.message,
+            network: networkInfo 
+        });
     }
 });
-
-//* Get advanced info of the host - RETURNS A PROMISE
-function retrieveHostInfo(subnet, networkInfo = null) {
-    return new Promise((resolve, reject) => {
-        console.log(`Starting NMAP scan for subnet: ${subnet}`);
-
-        const scan = new nmap.NmapScan(subnet, "-O");
-
-        scan.once('complete', async (data) => {
-            if (clientConn) {
-                clientConn.sendUTF(JSON.stringify({ 
-                    type: 'scanComplete', 
-                    msg: '', 
-                    network: subnet 
-                }));
-            }
-            
-            console.log(`NMAP found ${data.length} hosts in ${subnet}. Saving all hosts at once...`);
-            
-            try {
-                // Use addMultipleHosts to avoid race conditions and ensure all hosts are saved
-                await addMultipleHosts(subnet, data);
-                console.log(`Successfully saved ${data.length} hosts for network ${subnet}`);
-                resolve({ subnet: subnet, hosts: data.length, success: true });
-            } catch (error) {
-                console.error(`Error saving multiple hosts for ${subnet}:`, error);
-                // Fallback to individual saves
-                console.log('Falling back to individual host saves...');
-                
-                const savePromises = data.map(hostData =>
-                    addOrUpdateHost(subnet, hostData).catch(err => {
-                        console.error(`Error saving host ${hostData.ip}:`, err.message);
-                        return { status: 'rejected', reason: err };
-                    })
-                );
-
-                Promise.allSettled(savePromises)
-                    .then(() => {
-                        console.log(`All host save operations completed for ${subnet}`);
-                        resolve({ subnet: subnet, hosts: data.length, success: true });
-                    })
-                    .catch(err => {
-                        console.error(`Error during concurrent host saving coordination for ${subnet}:`, err);
-                        resolve({ subnet: subnet, hosts: data.length, error: 'Internal save coordination failure' });
-                    });
-            }
-        });
-
-        scan.once('error', (err) => {
-            console.error(`NMAP scan error for ${subnet}:`, err);
-            reject(err);
-        });
-        scan.startScan();
-    });
-}
 
 //* Update the name and operative system of the specified host
 app.post('/updateHostDetails', async (req, res) => {
@@ -640,8 +535,10 @@ app.post('/pingAllHosts', async (req, res) => {
         };
     });
     
-    const updatePromises = connectivityStatus.map(result => updateHostStatus(result));
-    await Promise.allSettled(updatePromises);
+    // Update statuses sequentially 
+    for (const result of connectivityStatus) {
+        await updateHostStatus(result);
+    }
     
     res.json({ connectivityStatus });
 });
@@ -832,11 +729,7 @@ webSocketServer.on('request', function (req) {
                     password: data.pass
                 });
 
-                sshClient.on('error', err => {           
-                // clientConn.sendUTF(
-                // JSON.stringify({ 
-                // message: `User "${data.user}" attempted connecting to this device via SSH.\n \x1b[31mSSH Error: 
-                // ${err.message}\x1b[0m\r\n`, type: "error"}))            
+                sshClient.on('error', err => {                    
                 tempLogs.push({
                     ip: data.ip,
                     action: "ssh",
@@ -949,4 +842,3 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
         res.status(500).json({ error: 'Upload failed' });
     }
 });
-

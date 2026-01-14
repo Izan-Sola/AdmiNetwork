@@ -75,5 +75,6 @@ function getDate() {
 
     return String(now);
 }
+
 window.insertLog = insertLog;
 window.displayLog = displayLog;

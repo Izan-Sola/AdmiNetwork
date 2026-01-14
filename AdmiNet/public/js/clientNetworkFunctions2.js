@@ -644,7 +644,7 @@ function pausePing() {
 
 function resumePing() {
     if (!pingInterval) {
-        pingInterval = setInterval(pingAllHosts, 15000);
+        pingInterval = setInterval(pingAllHosts, 5000);
     }
 }
 

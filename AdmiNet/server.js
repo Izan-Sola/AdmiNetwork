@@ -79,41 +79,61 @@ server.listen(3001, '0.0.0.0', () => {
 
 //* Endpoint for scanning every available network if possible
 app.post('/getAllNetworks', async (req, res) => {
-
+    await initializeDataFile();
+    
+    // First, get all network interfaces and create network entries
     const networks = await getNetworksInfo({
-        scanHosts: true
-    })
-    //Save the network metadata concurrently.
-    const savePromises = networks.map(network => saveNetworkInfo(network))
-    await Promise.allSettled(savePromises)
-
-    res.json({ networks })
-})
+        scanHosts: false  // Don't scan hosts yet
+    });
+    
+    // Create all networks first (concurrently is fine since they're different networks)
+    const networkCreationPromises = networks.map(network => findOrCreateNetwork(network));
+    await Promise.allSettled(networkCreationPromises);
+    
+    console.log(`Created ${networks.length} network entries`);
+    
+    // Now scan hosts for each network (one at a time to avoid file contention)
+    for (const network of networks) {
+        try {
+            await retrieveHostInfo(network.cidr, network);
+            console.log(`Completed scan for network: ${network.cidr}`);
+        } catch (error) {
+            console.error(`Failed to scan network ${network.cidr}:`, error.message);
+        }
+    }
+    
+    res.json({ networks });
+});
 
 //* Gets the info of 1 or all network INTERFACES, whether there is a targetCIDR or not, and scans all the hosts if specified
 async function getNetworksInfo(options = {}) {
     const {
         targetCIDR = null,
         scanHosts = false
-    } = options
+    } = options;
 
-    const interfaces = os.networkInterfaces()
-    const networks = []
-    const scanPromises = []
+    const interfaces = os.networkInterfaces();
+    const networks = [];
 
     for (const interfaceName in interfaces) {
-
         for (const iface of interfaces[interfaceName]) {
-
             if (iface.family === 'IPv4' && !iface.internal) {
-                const subnet = ip.subnet(iface.address, iface.netmask)
-                const interfaceCIDR = `${subnet.networkAddress}/${subnet.subnetMaskLength}`
-                clientConn.sendUTF(JSON.stringify({ network: interfaceCIDR, type: 'foundNetwork', msg: "" }))
+                const subnet = ip.subnet(iface.address, iface.netmask);
+                const interfaceCIDR = `${subnet.networkAddress}/${subnet.subnetMaskLength}`;
+                
+                if (clientConn) {
+                    clientConn.sendUTF(JSON.stringify({ 
+                        network: interfaceCIDR, 
+                        type: 'foundNetwork', 
+                        msg: "" 
+                    }));
+                }
+                
                 if (targetCIDR) {
-                    const [targetHostIP] = targetCIDR.split('/')
+                    const [targetHostIP] = targetCIDR.split('/');
                     if (iface.address === targetHostIP) {
-                        const networkSubnet = ip.cidrSubnet(targetCIDR)
-                        const networkCIDR = `${networkSubnet.networkAddress}/${targetCIDR.split('/')[1]}`
+                        const networkSubnet = ip.cidrSubnet(targetCIDR);
+                        const networkCIDR = `${networkSubnet.networkAddress}/${targetCIDR.split('/')[1]}`;
 
                         const networkInfo = {
                             interface: interfaceName,
@@ -121,12 +141,8 @@ async function getNetworksInfo(options = {}) {
                             netmask: iface.netmask,
                             cidr: networkCIDR,
                             hostCIDR: targetCIDR
-                        }
-                        networks.push(networkInfo)
-
-                        if (scanHosts) {
-                            scanPromises.push(retrieveHostInfo(networkCIDR))
-                        }
+                        };
+                        networks.push(networkInfo);
                     }
                 } else {
                     const networkInfo = {
@@ -134,33 +150,32 @@ async function getNetworksInfo(options = {}) {
                         ip: iface.address,
                         netmask: iface.netmask,
                         cidr: interfaceCIDR
-                    }
-                    networks.push(networkInfo)
-                    if (scanHosts) {
-                        scanPromises.push(retrieveHostInfo(interfaceCIDR))
-                    }
+                    };
+                    networks.push(networkInfo);
                 }
             }
         }
     }
 
-    if (scanHosts && scanPromises.length > 0) {
-        console.log(`Waiting for ${scanPromises.length} network scans to complete...`)
-        const scanResults = await Promise.allSettled(scanPromises)
-        scanResults.forEach(result => {
-            if (result.status === 'rejected') {
-                console.error('One network scan failed:', result.reason)
+    if (scanHosts && networks.length > 0) {
+        console.log(`Starting host scans for ${networks.length} networks...`);
+        // Scan hosts sequentially to avoid file contention
+        for (const network of networks) {
+            try {
+                await retrieveHostInfo(network.cidr, network);
+            } catch (error) {
+                console.error(`Failed to scan network ${network.cidr}:`, error.message);
             }
-        })
-        console.log('All network scans and host saves are complete.')
+        }
     }
 
     if (targetCIDR) {
-        return networks.length > 0 ? networks : []
+        return networks.length > 0 ? networks : [];
     } else {
-        return networks
+        return networks;
     }
 }
+
 
 //* Endpoint for scanning the specified network and insert each active host into the database
 app.post('/scanNetwork', async (req, res) => {
@@ -179,42 +194,40 @@ app.post('/scanNetwork', async (req, res) => {
 
 
 //* Get advanced info of the host - RETURNS A PROMISE
-function retrieveHostInfo(subnet) {
+function retrieveHostInfo(subnet, networkInfo) {
     return new Promise((resolve, reject) => {
-        console.log(`Starting NMAP scan for subnet: ${subnet}`)
+        console.log(`Starting NMAP scan for subnet: ${subnet}`);
 
-        const scan = new nmap.NmapScan(subnet, "-O")
+        const scan = new nmap.NmapScan(subnet, "-O");
 
-        scan.once('complete', (data) => {
-            clientConn.sendUTF(JSON.stringify({ type: 'scanComplete', msg: '', network: subnet }))
-            console.log(`NMAP found ${data.length} hosts in ${subnet}. Starting concurrent saves...`)
-
-
-            const savePromises = data.map(hostData =>
-                saveHostsInfo(subnet, hostData).catch(err => {
-                    console.error(`Error saving host ${hostData.ip}:`, err.message)
-                    return { status: 'rejected', reason: err }
-                })
-            )
-
-            Promise.allSettled(savePromises)
-                .then(() => {
-                    console.log(`All host save operations completed for ${subnet}`)
-                    resolve({ subnet: subnet, hosts: data.length })
-                })
-                .catch(err => {
-
-                    console.error(`Error during concurrent host saving coordination for ${subnet}:`, err)
-                    resolve({ subnet: subnet, hosts: data.length, error: 'Internal save coordination failure' })
-                })
-        })
+        scan.once('complete', async (data) => {
+            if (clientConn) {
+                clientConn.sendUTF(JSON.stringify({ 
+                    type: 'scanComplete', 
+                    msg: '', 
+                    network: subnet 
+                }));
+            }
+            
+            console.log(`NMAP found ${data.length} hosts in ${subnet}. Saving hosts...`);
+            
+            try {
+                // Network is guaranteed to exist now
+                await addHosts(subnet, data);
+                console.log(`Successfully saved ${data.length} hosts for network ${subnet}`);
+                resolve({ subnet: subnet, hosts: data.length, success: true });
+            } catch (error) {
+                console.error(`Error saving hosts for ${subnet}:`, error);
+                reject(error);
+            }
+        });
 
         scan.once('error', (err) => {
-            console.error(`NMAP scan error for ${subnet}:`, err)
-            reject(err)
-        })
-        scan.startScan()
-    })
+            console.error(`NMAP scan error for ${subnet}:`, err);
+            reject(err);
+        });
+        scan.startScan();
+    });
 }
 
 
