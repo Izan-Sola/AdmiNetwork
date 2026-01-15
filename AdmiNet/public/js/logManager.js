@@ -15,7 +15,6 @@ export { insertLog, displayLog }
                     action: "telnet", 
                     type: "info", 
                     message: "Ping timedout at (time,date)",
-                    timestamp: "None"
     }
     device_logs.push(example_log)
 
@@ -75,6 +74,8 @@ function getDate() {
 
     return String(now);
 }
-
+$(document).ready(function () {
+    insertLog(example_log.IP, example_log.action, example_log.type, example_log.message)
+});
 window.insertLog = insertLog;
 window.displayLog = displayLog;

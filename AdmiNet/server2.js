@@ -18,7 +18,9 @@ nmap.nmapLocation = "C:/Program Files (x86)/Nmap/nmap.exe"
 
 let tempLogs = [];
 let clientConn = null;
+
 const DATA_FILE = path.join(__dirname, 'networks_data.json');
+const LOG_FILE = path.join(__dirname, 'logs.json')
 
 const rateLimit = rateLimiter({
     windowMs: 2 * 60 * 1000, // 2 minutes
@@ -28,17 +30,13 @@ const rateLimit = rateLimiter({
     ipv6Subnet: 56, // Set to 60 or 64 to be less aggressive, or 52 or 48 to be more aggressive. 
 });
 app.use(rateLimit);
-
 app.set('port', 3001);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.static('public'));
 
-const NetWorkScanner = require('network-scanner-js');
-const netScan = new NetWorkScanner();
 require('events').EventEmitter.defaultMaxListeners = 50;
-const networkInfo = require('network-info');
 
 //? <------ WEBSOCKET ------>
 const webSocketServer = new WebSocketServer({
@@ -70,17 +68,26 @@ server.listen(3001, '0.0.0.0', () => {
 async function initializeDataFile() {
     try {
         await fs.access(DATA_FILE);
-        // Try to read and parse to ensure it's valid JSON
         const data = await fs.readFile(DATA_FILE, 'utf8');
         JSON.parse(data);
     } catch (error) {
-        // File doesn't exist or is invalid, create it with empty array
         console.log('Initializing or repairing data file...');
-        await fs.writeFile(DATA_FILE, JSON.stringify({ networks: [] }, null, 2));
+        await fs.writeFile(DATA_FILE, JSON.stringify({ logs: [] }, null, 2));
     }
 }
 
-// Load all networks data with error handling
+async function initializeLogFile() {
+    try {
+        await fs.access(LOG_FILE);
+        const data = await fs.readFile(LOG_FILE, 'utf8');
+        JSON.parse(data);
+    } catch (error) {
+        console.log('Initializing or repairing log file...');
+        await fs.writeFile(LOG_FILE, JSON.stringify({ networks: [] }, null, 2));
+    }
+}
+
+//* Load all networks data with error handling
 async function loadNetworksData() {
     try {
         const data = await fs.readFile(DATA_FILE, 'utf8');
@@ -95,7 +102,7 @@ async function loadNetworksData() {
     }
 }
 
-// Save networks data
+//* Save networks data
 async function saveNetworksData(data) {
     try {
         await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
@@ -105,13 +112,8 @@ async function saveNetworksData(data) {
     }
 }
 
-// Find network by CIDR
-async function findNetworkByCIDR(cidr) {
-    const data = await loadNetworksData();
-    return data.networks.find(network => network.cidr === cidr);
-}
 
-// Find or create network
+//* Find or create network
 async function findOrCreateNetwork(networkInfo) {
     const data = await loadNetworksData();
     const existingNetworkIndex = data.networks.findIndex(n => n.cidr === networkInfo.cidr);
@@ -141,8 +143,8 @@ async function findOrCreateNetwork(networkInfo) {
     return networkInfo.cidr;
 }
 
-// Add multiple hosts at once
-async function addHosts(networkCIDR, hostsDataArray) {
+//* Add multiple hosts at once
+async function addHosts(networkCIDR, hostData) {
     const data = await loadNetworksData();
     const networkIndex = data.networks.findIndex(n => n.cidr === networkCIDR);
     
@@ -159,7 +161,7 @@ async function addHosts(networkCIDR, hostsDataArray) {
     });
     
     // Process each new host
-    for (const hostData of hostsDataArray) {
+    for (const hostData of hostData) {
         if (existingHostMap.has(hostData.ip)) {
             // Update existing host
             const existingHost = existingHostMap.get(hostData.ip);
@@ -196,12 +198,12 @@ async function addHosts(networkCIDR, hostsDataArray) {
         }
     }
     
-    console.log(`Processed ${hostsDataArray.length} hosts for network ${networkCIDR}, total hosts: ${network.hosts.length}`);
+    console.log(`Processed ${hostData.length} hosts for network ${networkCIDR}, total hosts: ${network.hosts.length}`);
     network.lastUpdated = getDate();
     await saveNetworksData(data);
 }
 
-// Update host details
+//* Update host details
 async function updateHostDetails(hostIP, newName, newOs, networkCIDR) {
     const data = await loadNetworksData();
     const networkIndex = data.networks.findIndex(n => n.cidr === networkCIDR);
@@ -224,7 +226,7 @@ async function updateHostDetails(hostIP, newName, newOs, networkCIDR) {
     await saveNetworksData(data);
 }
 
-// Update host status
+//* Update host status
 async function updateHostStatus(result) {
     const data = await loadNetworksData();
     
@@ -252,7 +254,7 @@ async function updateHostStatus(result) {
     await saveNetworksData(data);
 }
 
-// Remove host from network
+//* Remove host from network
 async function removeHost(hostIP, networkCIDR) {
     const data = await loadNetworksData();
     const networkIndex = data.networks.findIndex(n => n.cidr === networkCIDR);
@@ -276,7 +278,7 @@ async function removeHost(hostIP, networkCIDR) {
     await saveNetworksData(data);
 }
 
-// Remove network
+//* Remove network
 async function removeNetwork(networkCIDR) {
     const data = await loadNetworksData();
     const initialCount = data.networks.length;
@@ -631,6 +633,8 @@ app.post('/removeNetwork', async (req, res) => {
 app.post('/updateLog', async (req, res) => {
     tempLogs.push(req.body.log);
     console.log(req.body.log);
+    await initializeLogFile()
+    await fs.writeFile(LOG_FILE, JSON.stringify({...tempLogs}), null, 2)
     res.sendStatus(200);
 });
 
@@ -651,7 +655,7 @@ function getDate() {
     return `${mm}/${dd}/${yyyy} at ${h}:${m}:${s}`;
 }
 
-// Debug endpoint to view raw data file
+//* Debug endpoint to view raw data file
 app.get('/debug/data', async (req, res) => {
     try {
         const rawData = await fs.readFile(DATA_FILE, 'utf8');
@@ -660,8 +664,17 @@ app.get('/debug/data', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+//* Debug endpoint to view logs
+app.get('/debug/logs', async (req, res) => {
+    try {
+        const rawData = await fs.readFile(LOG_FILE, 'utf8');
+        res.type('text/plain').send(rawData);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
-// Debug endpoint to view detailed stats
+//* Debug endpoint to view detailed stats
 app.get('/debug/stats', async (req, res) => {
     try {
         const data = await loadNetworksData();
@@ -691,8 +704,9 @@ app.post('/debug/reset', async (req, res) => {
 });
 
 // Initialize data file on startup
-initializeDataFile().then(() => {
-    console.log('Data file initialized');
+initializeDataFile().then(() => { console.log('Data file initialized');
+    initializeLogFile().then(() => { console.log('Log file initialized')
+    })
 }).catch(err => {
     console.error('Failed to initialize data file:', err);
 });
