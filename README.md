@@ -1,4 +1,4 @@
-# AdmiNetwork (WIP)
+# AdmiNetwork (WIP) (proyecto grado superior)
 
 Administrate the available networks with this Electron web applicaton.
 
@@ -11,6 +11,27 @@ Logs information about each host like the last ping, last connections, active ti
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3b1109b0-55db-4e66-85d0-6dabface2e64" />
 
 <br>
+
+
+
+# Documentation:
+
+## Remote connection:
+
+### test
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## TODO
 
