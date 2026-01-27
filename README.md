@@ -30,6 +30,14 @@ AdmiNetwork provides 3 different ways of connecting remotely to a device:
 - Via SFTP, allowing you to browse browse the remote directory, upload and download files.
 - Via Telnet, for devides such as routers that might not support SSH.
 
+## Logging:
+
+- AdmiNetwork implements a logging system to save a record of relevant activity such as remote connections, saving the user that performed the action, the device he connected to, and each command that was performed.
+- Each card displays information about the last successful ping that was performed on that device, letting you know for how long that device has been inactive if down.
+
+## Data storage:
+
+- AdmiNetwork uses a JSON file for storing data related to the networks and their hosts, and another JSON file for storing all the logs. This ensures instant load times when retrieving big chunks of data.
 
 
 
