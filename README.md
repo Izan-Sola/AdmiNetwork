@@ -33,8 +33,9 @@ AdmiNetwork provides 3 different ways of connecting remotely to a device:
 
 ## Logging:
 
-- AdmiNetwork implements a logging system to save a record of relevant activity such as remote connections, saving the user that performed the action, the device he connected to, and each command that was performed.
-- Each card displays information about the last successful ping that was performed on that device, letting you know for how long that device has been inactive if down.
+- AdmiNetwork implements a logging system to save a record of relevant activity such as remote connections; saving the user that performed the action, the device he connected to, and each command that was performed. 
+- Each card displays the ping response time and the last successful ping that was performed on the device, letting you know for how long it has been inactive if down.
+
 
 ## Data storage:
 
