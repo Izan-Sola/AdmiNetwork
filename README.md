@@ -18,17 +18,18 @@ Logs information about each host like the last ping, last connections, active ti
 
 ## Network scanning:
 
-- Making use of the node-nmap library and a local installation of nmap in the machine, AdmiNetwork scans all the available networks and retrieves detailed information such as, the IP address, the operative system, open ports...
-- Each network can be accesed by clicking on it in the left panel. All of the devices will be organized in cards, displaying information about them and the options to edit them, view their details, and delete them.
+- Making use of the node-nmap library and a local installation of nmap in the machine, AdmiNetwork scans all the available networks and retrieves detailed information such as: the IP address, the operative system, open ports...
+- Each network can be viewed by clicking on it in the left panel. All of the devices are organized in cards, displaying information about them and the options to edit them, view their details, and delete them.
 
 
 ## Remote connection:
 
 AdmiNetwork provides 3 different ways of connecting remotely to a device:
 
-- Via SSH, using libraries such as Ssh-2 for the remote connection and Keytar to store the keys safely in the credential manager of your operative system and allows easy use of them.
+- Via SSH, using libraries such as Ssh-2 for the remote connection, xTerm for the simulated terminal and Keytar to store the keys safely in the credential manager of your operative system allowing easy and secure use of them. 
 - Via SFTP, allowing you to browse browse the remote directory, upload and download files.
-- Via Telnet, for devides such as routers that might not support SSH.
+- Via Telnet, for devices such as routers that might not support SSH.
+
 
 ## Logging:
 
@@ -37,7 +38,7 @@ AdmiNetwork provides 3 different ways of connecting remotely to a device:
 
 ## Data storage:
 
-- AdmiNetwork uses a JSON file for storing data related to the networks and their hosts, and another JSON file for storing all the logs. This ensures instant load times when retrieving big chunks of data.
+- AdmiNetwork uses a JSON file for storing data related to the networks and their hosts, and another JSON file for storing all the logs, ensuring instant load times when retrieving big chunks of data.
 
 
 
