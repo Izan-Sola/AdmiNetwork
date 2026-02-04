@@ -18,7 +18,7 @@ Logs information about each host like the last ping, last connections, active ti
 
 ## Network scanning:
 
-- Making use of the node-nmap library and a local installation of nmap in the machine, AdmiNetwork scans all the available networks and retrieves detailed information such as: the IP address, the operative system, open ports...
+- Making use of the `node-nmap` library and a local installation of nmap in the machine, AdmiNetwork scans all the available networks and retrieves detailed information such as: the IP address, the operative system, open ports...
 - Each network can be viewed by clicking on it in the left panel. All of the devices are organized in cards, displaying information about them and the options to edit them, view their details, and delete them.
 
 
