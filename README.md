@@ -26,7 +26,7 @@ Logs information about each host like the last ping, last connections, active ti
 
 AdmiNetwork provides 3 different ways of connecting remotely to a device:
 
-- Via SSH, using libraries such as Ssh-2 for the remote connection, xTerm for the simulated terminal and Keytar to store the keys safely in the credential manager of your operative system allowing easy and secure use of them. 
+- Via SSH, using libraries such as `Ssh-2` for the remote connection, `xTerm` for the simulated terminal and `Keytar` to store the keys safely in the credential manager of your operative system allowing easy and secure use of them. 
 - Via SFTP, allowing you to browse the remote directory, upload and download files.
 - Via Telnet, for devices such as routers that might not support SSH.
 
