@@ -54,11 +54,10 @@ AdmiNetwork provides 3 different ways of connecting remotely to a device:
 
 
 
-## TODO
+## Possibles TODOs
 
 - Rename some functions names to be less confusing
 - Telnet connection. Polish ssh and sftp, implement keytar.
-- Logs for each device and network (Perchance, implement AI so you can ask it to provide you with specific data in the logs)
 - Implement Electron for the desktop app version
 - Users, permissions...
 - Probably some more stuff that I cant think about of the top of my head rn...
