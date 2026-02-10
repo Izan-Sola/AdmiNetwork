@@ -36,10 +36,7 @@ function insertLog(IP, action, type, message) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ log: new_log })
     })
-        // .then(res => res.json())
-        // .then(data => {
-        //     console.log("Successfully updated logs!")
-        // })
+
 }
 //* Display all logs. Optionally accepts filter options
 function displayLog({ IP = null, type = "all", action = "all" } = {}) {
@@ -60,7 +57,6 @@ function displayLog({ IP = null, type = "all", action = "all" } = {}) {
     });
 }
 
-
 function getDate() {
     var now = new Date();
     var dd = String(now.getDate()).padStart(2, '0');
@@ -74,6 +70,7 @@ function getDate() {
 
     return String(now);
 }
+
 $(document).ready(function () {
     insertLog(example_log.IP, example_log.action, example_log.type, example_log.message)
 });

@@ -72,7 +72,7 @@ async function initializeDataFile() {
         JSON.parse(data);
     } catch (error) {
         console.log('Initializing or repairing data file...');
-        await fs.writeFile(DATA_FILE, JSON.stringify({ logs: [] }, null, 2));
+        await fs.writeFile(DATA_FILE, JSON.stringify({ networks: [] }, null, 2));
     }
 }
 
@@ -83,7 +83,7 @@ async function initializeLogFile() {
         JSON.parse(data);
     } catch (error) {
         console.log('Initializing or repairing log file...');
-        await fs.writeFile(LOG_FILE, JSON.stringify({ networks: [] }, null, 2));
+        await fs.writeFile(LOG_FILE, JSON.stringify({ logs: [] }, null, 2));
     }
 }
 
@@ -144,7 +144,7 @@ async function findOrCreateNetwork(networkInfo) {
 }
 
 //* Add multiple hosts at once
-async function addHosts(networkCIDR, hostData) {
+async function addHosts(networkCIDR, hostDataArray) {
     const data = await loadNetworksData();
     const networkIndex = data.networks.findIndex(n => n.cidr === networkCIDR);
     
@@ -161,7 +161,7 @@ async function addHosts(networkCIDR, hostData) {
     });
     
     // Process each new host
-    for (const hostData of hostData) {
+    for (const hostData of hostDataArray) {
         if (existingHostMap.has(hostData.ip)) {
             // Update existing host
             const existingHost = existingHostMap.get(hostData.ip);
@@ -198,7 +198,7 @@ async function addHosts(networkCIDR, hostData) {
         }
     }
     
-    console.log(`Processed ${hostData.length} hosts for network ${networkCIDR}, total hosts: ${network.hosts.length}`);
+    console.log(`Processed ${hostDataArray.length} hosts for network ${networkCIDR}, total hosts: ${network.hosts.length}`);
     network.lastUpdated = getDate();
     await saveNetworksData(data);
 }
@@ -634,7 +634,7 @@ app.post('/updateLog', async (req, res) => {
     tempLogs.push(req.body.log);
     console.log(req.body.log);
     await initializeLogFile()
-    await fs.writeFile(LOG_FILE, JSON.stringify({...tempLogs}), null, 2)
+    await fs.writeFile(LOG_FILE, JSON.stringify({...tempLogs}), [], 2)
     res.sendStatus(200);
 });
 

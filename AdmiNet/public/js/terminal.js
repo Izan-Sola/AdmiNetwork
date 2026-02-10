@@ -43,7 +43,7 @@ ws.onmessage = e => {
     term.write(data.message);
 
     if (data.type === "error") {
-      insertLog(ip, "ssh", data.type, data.message);
+      insertLog(ip, "ssh", "error", data.message);
     } else {
       session_log.push(data.message);
     }

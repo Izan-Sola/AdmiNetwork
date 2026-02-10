@@ -124,6 +124,14 @@ function renderFiles(files, dir) {
           )
         } else {
           alert('Download failed', res.error)
+
+          insertLog(
+            ip,
+            "sftp",
+            "error",
+            `Failed to download ${f.name} for user: "${username}"`
+          );
+
         }
       }
       act.appendChild(downloadButton)
@@ -159,7 +167,16 @@ async function uploadFile() {
       `User "${username} has successfully uploaded the file: ${file.name}`
     )
 
-  } else alert('Upload failed')
+  } else {
+    alert('Upload failed')
+    
+          insertLog(
+            ip,
+            "sftp",
+            "error",
+            `Failed to upload ${file.name} by user: "${username}"`
+          );
+  }
 }
 
 window.connectSFTP = connectSFTP;
