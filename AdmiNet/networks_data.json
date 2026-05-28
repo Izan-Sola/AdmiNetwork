@@ -11,7 +11,7 @@
           "host_name": "_gateway",
           "host_os": "Linux 3.2 - 4.9",
           "openPorts": "[{\"port\":53,\"protocol\":\"tcp\",\"service\":\"domain\",\"method\":\"table\"},{\"port\":80,\"protocol\":\"tcp\",\"service\":\"http\",\"method\":\"table\"}]",
-          "last_ping": "05/28/2026 at 12:55:14",
+          "last_ping": "05/28/2026 at 12:55:44",
           "isAlive": true,
           "firstSeen": "05/28/2026 at 09:09:05",
           "lastUpdated": "05/28/2026 at 09:22:45"
@@ -21,7 +21,7 @@
           "host_name": "unknown",
           "host_os": "Linux 5.0 - 5.5",
           "openPorts": "[{\"port\":1080,\"protocol\":\"tcp\",\"service\":\"socks\",\"method\":\"table\"},{\"port\":8888,\"protocol\":\"tcp\",\"service\":\"sun-answerbook\",\"method\":\"table\"}]",
-          "last_ping": "05/28/2026 at 12:55:14",
+          "last_ping": "05/28/2026 at 12:55:44",
           "isAlive": false,
           "firstSeen": "05/28/2026 at 09:09:05",
           "lastUpdated": "05/28/2026 at 09:09:05"
@@ -31,7 +31,7 @@
           "host_name": "unknown",
           "host_os": "unknown",
           "openPorts": "[]",
-          "last_ping": "05/28/2026 at 12:55:14",
+          "last_ping": "05/28/2026 at 12:55:44",
           "isAlive": false,
           "firstSeen": "05/28/2026 at 09:09:05",
           "lastUpdated": "05/28/2026 at 09:09:05"
@@ -41,7 +41,7 @@
           "host_name": "unknown",
           "host_os": "Linux 3.2 - 4.9",
           "openPorts": "[{\"port\":8600,\"protocol\":\"tcp\",\"service\":\"asterix\",\"method\":\"table\"}]",
-          "last_ping": "05/28/2026 at 12:55:14",
+          "last_ping": "05/28/2026 at 12:55:44",
           "isAlive": false,
           "firstSeen": "05/28/2026 at 09:09:05",
           "lastUpdated": "05/28/2026 at 09:09:05"
@@ -51,7 +51,7 @@
           "host_name": "Portatil",
           "host_os": "Linux 5.3 - 5.4",
           "openPorts": "[{\"port\":22,\"protocol\":\"tcp\",\"service\":\"ssh\",\"method\":\"table\"},{\"port\":80,\"protocol\":\"tcp\",\"service\":\"http\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"}]",
-          "last_ping": "05/28/2026 at 12:55:14",
+          "last_ping": "05/28/2026 at 12:55:44",
           "isAlive": true,
           "firstSeen": "05/28/2026 at 09:09:05",
           "lastUpdated": "05/28/2026 at 09:19:56"
@@ -61,7 +61,7 @@
           "host_name": "unknown",
           "host_os": "unknown",
           "openPorts": "[]",
-          "last_ping": "05/28/2026 at 12:55:14",
+          "last_ping": "05/28/2026 at 12:55:44",
           "isAlive": true,
           "firstSeen": "05/28/2026 at 09:09:05",
           "lastUpdated": "05/28/2026 at 09:09:05"
@@ -71,14 +71,14 @@
           "host_name": "Mi PC",
           "host_os": "Linux 5.0 - 5.7",
           "openPorts": "[{\"port\":80,\"protocol\":\"tcp\",\"service\":\"http\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":443,\"protocol\":\"tcp\",\"service\":\"https\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":1234,\"protocol\":\"tcp\",\"service\":\"hotline\",\"method\":\"table\"},{\"port\":3001,\"protocol\":\"tcp\",\"service\":\"nessus\",\"method\":\"table\"}]",
-          "last_ping": "05/28/2026 at 12:55:14",
+          "last_ping": "05/28/2026 at 12:55:44",
           "isAlive": true,
           "firstSeen": "05/28/2026 at 09:09:05",
           "lastUpdated": "05/28/2026 at 09:20:15"
         }
       ],
       "createdAt": "05/28/2026 at 09:07:18",
-      "lastUpdated": "05/28/2026 at 12:55:14"
+      "lastUpdated": "05/28/2026 at 12:55:44"
     },
     {
       "interface": "ham0",
@@ -100,14 +100,14 @@
           "host_name": "izansola-b360m-hd3-1.tail6388ad.ts.net",
           "host_os": "Linux 5.0 - 5.7",
           "openPorts": "[{\"port\":80,\"protocol\":\"tcp\",\"service\":\"http\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":443,\"protocol\":\"tcp\",\"service\":\"https\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":1234,\"protocol\":\"tcp\",\"service\":\"hotline\",\"method\":\"table\"},{\"port\":3001,\"protocol\":\"tcp\",\"service\":\"nessus\",\"method\":\"table\"}]",
-          "last_ping": "05/28/2026 at 12:55:14",
+          "last_ping": "05/28/2026 at 12:55:44",
           "isAlive": true,
           "firstSeen": "05/28/2026 at 09:18:28",
           "lastUpdated": "05/28/2026 at 09:18:28"
         }
       ],
       "createdAt": "05/28/2026 at 09:07:18",
-      "lastUpdated": "05/28/2026 at 12:55:14"
+      "lastUpdated": "05/28/2026 at 12:55:44"
     }
   ]
 }
