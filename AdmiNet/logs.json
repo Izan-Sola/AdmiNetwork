@@ -1,1 +1,11 @@
-{"0":{"IP":"192.168.100.15","action":"telnet","type":"info","message":"Ping timedout at (time,date)","timestamp":"01/20/2026 at 12:41:57"},"1":{"IP":"192.168.100.15","action":"telnet","type":"info","message":"Ping timedout at (time,date)","timestamp":"01/20/2026 at 12:45:6"}}
+{
+  "logs": [
+    {
+      "IP": "192.168.18.48",
+      "action": "ssh",
+      "type": "info",
+      "message": "SSH session ended for \"IzanSSHKeys\"\nCommands run:\n  • exit",
+      "timestamp": "05/28/2026 at 12:47:25"
+    }
+  ]
+}

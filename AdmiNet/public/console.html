@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>NetPanel — SSH Terminal</title>
+  <title>AdmiNetwork — SSH Terminal</title>
+  <script src="./libs/jquery-3.7.1.js"></script>
   <link rel="stylesheet" href="css/styles2.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css">
 </head>
@@ -14,7 +15,7 @@
     <header class="topbar">
       <div class="brand">
         <div class="logo">NP</div>
-        <div class="title">NetPanel</div>
+        <div class="title">AdminetWork</div>
       </div>
       <div class="top-actions">
         <div class="userinfo">user@host</div>
@@ -34,9 +35,9 @@
       <main class="main">
         <div class="controls-row">
           <div class="left-controls">
-            <button class="btn small">Reconnect</button>
+            <!-- <button class="btn small">Reconnect</button>
             <button class="btn small">Refresh</button>
-            <button class="btn small">Upload Key</button>
+            <button class="btn small">Upload Key</button> -->
           </div>
           <div class="ip-display">IP: <span id="device-ip">192.168.1.10</span></div>
         </div>
@@ -45,10 +46,10 @@
           <div id="xterm" class="terminal-screen"></div>
         </div>
 
-        <div class="typing-bar">
+        <!-- <div class="typing-bar">
           <input id="cmd-input" class="cmd-input" placeholder="Type a command and press Enter" />
           <button id="send-cmd" class="btn">Send</button>
-        </div>
+        </div> -->
       </main>
     </div>
   </div>

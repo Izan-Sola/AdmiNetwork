@@ -12,9 +12,18 @@ const os = require('os');
 const ip = require('ip');
 const nmap = require('node-nmap');
 const ping = require('ping');
+// Near the top with other requires
+let keytar;
+try {
+    keytar = require('keytar');
+} catch (e) {
+    console.warn('keytar unavailable, credential storage disabled:', e.message);
+    keytar = null;
+}
 
-//nmap.nmapLocation = "/usr/bin/nmap"
-nmap.nmapLocation = "C:/Program Files (x86)/Nmap/nmap.exe"
+const KEYTAR_SERVICE = 'adminetwork';
+nmap.nmapLocation = "/usr/bin/nmap"
+//nmap.nmapLocation = "C:/Program Files (x86)/Nmap/nmap.exe"
 
 let tempLogs = [];
 let clientConn = null;
@@ -44,20 +53,105 @@ const webSocketServer = new WebSocketServer({
     autoAcceptConnections: false
 });
 
-webSocketServer.on("request", function (req) {
-    if (req.origin === 'http://localhost:3001' || req.origin === 'http://172.30.199.117:3001'
-        || req.origin === 'http://adminetwork.duckdns.org'
-    ) {
+// webSocketServer.on('request', function (req) {
+//     if (req.origin === 'http://localhost:3001' || req.origin === 'http://172.30.199.117:3001'
+//         || req.origin === 'http://adminetwork.duckdns.org'
+//     ) {
+//         const connection = req.accept(null, req.origin);
+//         connection.on("close", function () {
+//             console.log("Server closed");
+//         });
+//         clientConn = connection;
+//     } else {
+//         req.reject();
+//     }
+// });
+webSocketServer.on('request', function (req) {
+    const allowedOrigins = [
+        'http://localhost:3001',
+        'http://172.30.199.117:3001',
+        'http://adminetwork.duckdns.org',
+        'https://adminetwork.duckdns.org'
+    ];
+
+    if (!allowedOrigins.includes(req.origin) && req.resource !== '/ssh') {
+        req.reject();
+        return;
+    }
+
+    if (req.resource === '/ssh') {
+        const sshConn = req.accept(null, req.origin);
+        if (!sshConn) return;
+
+        let sshClient;
+
+        sshConn.on('message', async function (message) {
+            const data = JSON.parse(message.utf8Data);
+
+            if (data.ip && data.user && (data.pass || data.keyPath)) {
+                sshClient = new ssh.Client();
+
+                sshClient.on('error', err => {
+                    sshConn.sendUTF(`\x1b[31mSSH Error: ${err.message}\x1b[0m\r\n`);
+                    tempLogs.push({
+                        ip: data.ip, action: "ssh", type: "error",
+                        message: `User "${data.user}" failed SSH connection. Error: ${err.message}`,
+                        timestamp: getDate()
+                    });
+                });
+
+                sshClient.on('ready', () => {
+                    const authMethod = data.keyPath ? 'key pair' : 'password';
+                    sshConn.sendUTF('\x1b[32mSSH Connected!\x1b[0m\r\n$ ');
+                    tempLogs.push({
+                        ip: data.ip, action: "ssh", type: "info",
+                        message: `"${data.user}" connected via SSH (${authMethod})`,
+                        timestamp: getDate()
+                    });
+                    sshClient.shell((err, stream) => {
+                        if (err) return sshConn.sendUTF('Error opening shell\r\n');
+                        stream.on('data', chunk => sshConn.sendUTF(chunk.toString()));
+                        stream.on('close', () => sshClient.end());
+                        sshConn.on('message', msg => {
+                            const cmdData = JSON.parse(msg.utf8Data);
+                            if (cmdData.cmd) stream.write(cmdData.cmd);
+                        });
+                    });
+                });
+
+                const connectConfig = {
+                    host: data.ip,
+                    port: 22,
+                    username: data.user
+                };
+
+                if (data.keyPath) {
+                    try {
+                        connectConfig.privateKey = require('fs').readFileSync(data.keyPath);
+                        if (data.passphrase) connectConfig.passphrase = data.passphrase;
+                    } catch (err) {
+                        sshConn.sendUTF(`\x1b[31mFailed to read key file: ${err.message}\x1b[0m\r\n`);
+                        return;
+                    }
+                } else {
+                    connectConfig.password = data.pass;
+                }
+
+                sshClient.connect(connectConfig);
+            }
+        });
+
+        sshConn.on('close', () => { if (sshClient) sshClient.end(); });
+
+    } else {
+        // general connection handler
         const connection = req.accept(null, req.origin);
-        connection.on("close", function () {
+        connection.on('close', function () {
             console.log("Server closed");
         });
         clientConn = connection;
-    } else {
-        req.reject();
     }
 });
-
 server.listen(3001, '0.0.0.0', () => {
     console.log('Server started');
 });
@@ -630,17 +724,54 @@ app.post('/removeNetwork', async (req, res) => {
 
 //? <------ UTILITY FUNCTIONS ------>
 
+// ── Drop-in replacements for /updateLog and /retrieveLog in server.js ──
+
 app.post('/updateLog', async (req, res) => {
-    tempLogs.push(req.body.log);
-    console.log(req.body.log);
-    await initializeLogFile()
-    await fs.writeFile(LOG_FILE, JSON.stringify({...tempLogs}), [], 2)
-    res.sendStatus(200);
+    const newLog = req.body.log;
+    if (!newLog) return res.status(400).json({ error: 'No log provided' });
+
+    try {
+        await initializeLogFile();
+
+        // Read existing logs from file
+        const raw = await fs.readFile(LOG_FILE, 'utf8');
+        const parsed = JSON.parse(raw);
+        const logs = Array.isArray(parsed.logs) ? parsed.logs : [];
+
+        // Append new log
+        logs.push(newLog);
+
+        // Keep in-memory list in sync
+        tempLogs = logs;
+
+        // Write back to file
+        await fs.writeFile(LOG_FILE, JSON.stringify({ logs }, null, 2));
+
+        console.log('Log saved:', newLog);
+        res.sendStatus(200);
+    } catch (err) {
+        console.error('Error writing log:', err);
+        res.status(500).json({ error: 'Failed to save log' });
+    }
 });
 
 app.post('/retrieveLog', async (req, res) => {
-    console.log(tempLogs);
-    res.json({ tempLogs });
+    try {
+        await initializeLogFile();
+
+        const raw = await fs.readFile(LOG_FILE, 'utf8');
+        const parsed = JSON.parse(raw);
+        const logs = Array.isArray(parsed.logs) ? parsed.logs : [];
+
+        // Keep in-memory list in sync
+        tempLogs = logs;
+
+        res.json({ tempLogs: logs });
+    } catch (err) {
+        console.error('Error reading log file:', err);
+        // Fall back to in-memory if file read fails
+        res.json({ tempLogs });
+    }
 });
 
 function getDate() {
@@ -715,67 +846,67 @@ initializeDataFile().then(() => { console.log('Data file initialized');
 
 //? <----- SSH ----->
 
-webSocketServer.on('request', function (req) {
-    if (req.resource === '/ssh') {
-        //   const connection = req.accept(null, req.origin);
-        let sshClient;
+// webSocketServer.on('request', function (req) {
+//     if (req.resource === '/ssh') {
+//         const connection = req.accept(null, req.origin);
+//         let sshClient;
 
-        clientConn.on('message', async function (message) {
-            const data = JSON.parse(message.utf8Data);
+//         clientConn.on('message', async function (message) {
+//             const data = JSON.parse(message.utf8Data);
 
-            if (data.ip && data.user && data.pass) {
-                sshClient = new ssh.Client();
-                sshClient.on('ready', () => {
-                    clientConn.sendUTF('\x1b[32mSSH Connected!\x1b[0m\r\n$ ');
-                    sshClient.shell((err, stream) => {
-                        if (err) return clientConn.sendUTF('Error opening shell\r\n');
-                        stream.on('data', chunk => clientConn.sendUTF(chunk.toString()));
-                        stream.on('close', () => sshClient.end());
-                        clientConn.on('message', msg => {
-                            const cmdData = JSON.parse(msg.utf8Data);
-                            if (cmdData.cmd) stream.write(cmdData.cmd);
-                        });
-                    });
-                }).connect({
-                    host: data.ip,
-                    port: 22,
-                    username: data.user,
-                    password: data.pass
-                });
+//             if (data.ip && data.user && data.pass) {
+//                 sshClient = new ssh.Client();
+//                 sshClient.on('ready', () => {
+//                     clientConn.sendUTF('\x1b[32mSSH Connected!\x1b[0m\r\n$ ');
+//                     sshClient.shell((err, stream) => {
+//                         if (err) return clientConn.sendUTF('Error opening shell\r\n');
+//                         stream.on('data', chunk => clientConn.sendUTF(chunk.toString()));
+//                         stream.on('close', () => sshClient.end());
+//                         clientConn.on('message', msg => {
+//                             const cmdData = JSON.parse(msg.utf8Data);
+//                             if (cmdData.cmd) stream.write(cmdData.cmd);
+//                         });
+//                     });
+//                 }).connect({
+//                     host: data.ip,
+//                     port: 22,
+//                     username: data.user,
+//                     password: data.pass
+//                 });
 
-                sshClient.on('error', err => {                    
-                tempLogs.push({
-                    ip: data.ip,
-                    action: "ssh",
-                    type: "error",
-                    message: `User "${data.user}" attempted connecting to this device via SSH.\n 
-                    \x1b[31mSSH Error: ${err.message}\x1b[0m\r\n`,
-                    timestamp: getDate()
-                })
-            });
+//                 sshClient.on('error', err => {                    
+//                 tempLogs.push({
+//                     ip: data.ip,
+//                     action: "ssh",
+//                     type: "error",
+//                     message: `User "${data.user}" attempted connecting to this device via SSH.\n 
+//                     \x1b[31mSSH Error: ${err.message}\x1b[0m\r\n`,
+//                     timestamp: getDate()
+//                 })
+//             });
 
-            sshClient.on('ready', msg => {
-                console.log(msg)
-                clientConn.sendUTF(
-                JSON.stringify({ message: `"${data.user}" has successfully connected to this device via SHH`, type: "info"}))
-                tempLogs.push({
-                    ip: data.ip,
-                    action: "ssh",
-                    type: error,
-                    message: `"${data.user}" has successfully connected to this device via SHH`,
-                    timeStamp: getDate()
-                })
-            })
-            } else if (data.cmd && sshClient) {
-                // handled by terminal listener
-            }
-        });
+//             sshClient.on('ready', msg => {
+//                 console.log(msg)
+//                 clientConn.sendUTF(
+//                 JSON.stringify({ message: `"${data.user}" has successfully connected to this device via SHH`, type: "info"}))
+//                 tempLogs.push({
+//                     ip: data.ip,
+//                     action: "ssh",
+//                     type: error,
+//                     message: `"${data.user}" has successfully connected to this device via SHH`,
+//                     timeStamp: getDate()
+//                 })
+//             })
+//             } else if (data.cmd && sshClient) {
+//                 // handled by terminal listener
+//             }
+//         });
 
-        clientConn.on('close', () => { if (sshClient) sshClient.end(); });
-    } else {
-        // req.reject();
-    }
-});
+//         clientConn.on('close', () => { if (sshClient) sshClient.end(); });
+//     } else {
+//         //req.reject();
+//     }
+// });
 
 //? <----- SFTP ----->
 
@@ -786,9 +917,9 @@ const upload = multer({ dest: 'uploads/' });
 
 //* List the current directory
 app.post('/api/list', async (req, res) => {
-    const { username, password, dir } = req.body;
-    const ip = req.body.ip || sessionStorage.getItem('ssh_ip'); // optional dynamic IP from client
-
+    // const { username, password, dir } = req.body;
+    // const ip = req.body.ip || sessionStorage.getItem('ssh_ip'); // optional dynamic IP from client
+    const { username, password, dir, ip } = req.body;
     if (!username || !password) return res.json({ success: false, error: 'Missing credentials' });
 
     const sftp = new SftpClient();
@@ -854,5 +985,76 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
     } catch (err) {
         console.error('SFTP upload error:', err);
         res.status(500).json({ error: 'Upload failed' });
+    }
+});
+//? <------ CREDENTIAL STORAGE (keytar) ------>
+
+app.post('/api/credentials/save', async (req, res) => {
+    const { ip, username, credential } = req.body;
+    if (!ip || !username || !credential)
+        return res.status(400).json({ success: false, error: 'ip, username and credential are required' });
+    if (!keytar)
+        return res.status(503).json({ success: false, error: 'Credential storage not available' });
+
+    try {
+        // Store the whole credential object as JSON string
+        await keytar.setPassword(KEYTAR_SERVICE, `${username}@${ip}`, JSON.stringify(credential));
+        res.json({ success: true });
+    } catch (err) {
+        console.error('keytar save error:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.post('/api/credentials/get', async (req, res) => {
+    const { ip, username } = req.body;
+    if (!ip || !username)
+        return res.status(400).json({ success: false, error: 'ip and username are required' });
+    if (!keytar)
+        return res.json({ success: false, error: 'Credential storage not available' });
+
+    try {
+        const raw = await keytar.getPassword(KEYTAR_SERVICE, `${username}@${ip}`);
+        if (!raw) return res.json({ success: false, error: 'No saved credentials found' });
+
+        let credential;
+        try {
+            credential = JSON.parse(raw);
+        } catch {
+            // Legacy plain-text password stored before this update
+            credential = { type: 'password', password: raw };
+        }
+        res.json({ success: true, credential });
+    } catch (err) {
+        console.error('keytar get error:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.post('/api/credentials/delete', async (req, res) => {
+    const { ip, username } = req.body;
+    if (!ip || !username)
+        return res.status(400).json({ success: false, error: 'ip and username are required' });
+    if (!keytar)
+        return res.json({ success: false, error: 'Credential storage not available' });
+
+    try {
+        const deleted = await keytar.deletePassword(KEYTAR_SERVICE, `${username}@${ip}`);
+        res.json({ success: deleted });
+    } catch (err) {
+        console.error('keytar delete error:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Validate that a key file path exists and is readable before the client commits to it
+app.post('/api/credentials/check-key', async (req, res) => {
+    const { keyPath } = req.body;
+    if (!keyPath) return res.status(400).json({ exists: false });
+    try {
+        await require('fs').promises.access(keyPath, require('fs').constants.R_OK);
+        res.json({ exists: true });
+    } catch {
+        res.json({ exists: false });
     }
 });

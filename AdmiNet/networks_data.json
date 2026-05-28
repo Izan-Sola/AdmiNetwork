@@ -1,404 +1,113 @@
 {
   "networks": [
     {
-      "interface": "Ethernet",
-      "ip": "172.30.199.117",
+      "interface": "enp4s0",
+      "ip": "192.168.18.48",
       "netmask": "255.255.255.0",
-      "cidr": "172.30.199.0/24",
+      "cidr": "192.168.18.0/24",
       "hosts": [
         {
-          "host_ip": "172.30.199.1",
+          "host_ip": "192.168.18.1",
+          "host_name": "_gateway",
+          "host_os": "Linux 3.2 - 4.9",
+          "openPorts": "[{\"port\":53,\"protocol\":\"tcp\",\"service\":\"domain\",\"method\":\"table\"},{\"port\":80,\"protocol\":\"tcp\",\"service\":\"http\",\"method\":\"table\"}]",
+          "last_ping": "05/28/2026 at 12:53:54",
+          "isAlive": true,
+          "firstSeen": "05/28/2026 at 09:09:05",
+          "lastUpdated": "05/28/2026 at 09:22:45"
+        },
+        {
+          "host_ip": "192.168.18.13",
+          "host_name": "unknown",
+          "host_os": "Linux 5.0 - 5.5",
+          "openPorts": "[{\"port\":1080,\"protocol\":\"tcp\",\"service\":\"socks\",\"method\":\"table\"},{\"port\":8888,\"protocol\":\"tcp\",\"service\":\"sun-answerbook\",\"method\":\"table\"}]",
+          "last_ping": "05/28/2026 at 12:53:54",
+          "isAlive": false,
+          "firstSeen": "05/28/2026 at 09:09:05",
+          "lastUpdated": "05/28/2026 at 09:09:05"
+        },
+        {
+          "host_ip": "192.168.18.22",
           "host_name": "unknown",
           "host_os": "unknown",
           "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.61",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 10 1803",
-          "openPorts": "[{\"port\":22,\"protocol\":\"tcp\",\"service\":\"ssh\",\"method\":\"table\"},{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.76",
-          "host_name": "unknown",
-          "host_os": "Linux 4.15 - 5.19",
-          "openPorts": "[{\"port\":22,\"protocol\":\"tcp\",\"service\":\"ssh\",\"method\":\"table\"},{\"port\":111,\"protocol\":\"tcp\",\"service\":\"rpcbind\",\"method\":\"table\"},{\"port\":3128,\"protocol\":\"tcp\",\"service\":\"squid-http\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.77",
-          "host_name": "unknown",
-          "host_os": "Linux 4.15 - 5.19",
-          "openPorts": "[{\"port\":22,\"protocol\":\"tcp\",\"service\":\"ssh\",\"method\":\"table\"},{\"port\":80,\"protocol\":\"tcp\",\"service\":\"http\",\"method\":\"table\"},{\"port\":8080,\"protocol\":\"tcp\",\"service\":\"http-proxy\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.79",
-          "host_name": "unknown",
-          "host_os": "Linux 4.15 - 5.19",
-          "openPorts": "[{\"port\":80,\"protocol\":\"tcp\",\"service\":\"http\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.102",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 11 21H2",
-          "openPorts": "[{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":3306,\"protocol\":\"tcp\",\"service\":\"mysql\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.103",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 11 21H2",
-          "openPorts": "[{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":3306,\"protocol\":\"tcp\",\"service\":\"mysql\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.105",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 11 21H2",
-          "openPorts": "[{\"port\":80,\"protocol\":\"tcp\",\"service\":\"http\",\"method\":\"table\"},{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":443,\"protocol\":\"tcp\",\"service\":\"https\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":3306,\"protocol\":\"tcp\",\"service\":\"mysql\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.109",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 11 21H2",
-          "openPorts": "[{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":3306,\"protocol\":\"tcp\",\"service\":\"mysql\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.110",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 11 21H2",
-          "openPorts": "[{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":3306,\"protocol\":\"tcp\",\"service\":\"mysql\",\"method\":\"table\"},{\"port\":5000,\"protocol\":\"tcp\",\"service\":\"upnp\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.111",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 10 1703 or Windows 11 21H2",
-          "openPorts": "[{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":902,\"protocol\":\"tcp\",\"service\":\"iss-realsecure\",\"method\":\"table\"},{\"port\":912,\"protocol\":\"tcp\",\"service\":\"apex-mesh\",\"method\":\"table\"},{\"port\":2179,\"protocol\":\"tcp\",\"service\":\"vmrdp\",\"method\":\"table\"},{\"port\":3306,\"protocol\":\"tcp\",\"service\":\"mysql\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.112",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 11 21H2",
-          "openPorts": "[{\"port\":80,\"protocol\":\"tcp\",\"service\":\"http\",\"method\":\"table\"},{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":443,\"protocol\":\"tcp\",\"service\":\"https\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":3306,\"protocol\":\"tcp\",\"service\":\"mysql\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.119",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 11 21H2",
-          "openPorts": "[{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":3306,\"protocol\":\"tcp\",\"service\":\"mysql\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.120",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 11 21H2",
-          "openPorts": "[{\"port\":80,\"protocol\":\"tcp\",\"service\":\"http\",\"method\":\"table\"},{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":443,\"protocol\":\"tcp\",\"service\":\"https\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":3306,\"protocol\":\"tcp\",\"service\":\"mysql\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.200",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows Server 2008 R2 SP1",
-          "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
+          "last_ping": "05/28/2026 at 12:53:54",
           "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
+          "firstSeen": "05/28/2026 at 09:09:05",
+          "lastUpdated": "05/28/2026 at 09:09:05"
         },
         {
-          "host_ip": "172.30.199.201",
+          "host_ip": "192.168.18.56",
+          "host_name": "unknown",
+          "host_os": "Linux 3.2 - 4.9",
+          "openPorts": "[{\"port\":8600,\"protocol\":\"tcp\",\"service\":\"asterix\",\"method\":\"table\"}]",
+          "last_ping": "05/28/2026 at 12:53:54",
+          "isAlive": false,
+          "firstSeen": "05/28/2026 at 09:09:05",
+          "lastUpdated": "05/28/2026 at 09:09:05"
+        },
+        {
+          "host_ip": "192.168.18.58",
+          "host_name": "Portatil",
+          "host_os": "Linux 5.3 - 5.4",
+          "openPorts": "[{\"port\":22,\"protocol\":\"tcp\",\"service\":\"ssh\",\"method\":\"table\"},{\"port\":80,\"protocol\":\"tcp\",\"service\":\"http\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"}]",
+          "last_ping": "05/28/2026 at 12:53:54",
+          "isAlive": true,
+          "firstSeen": "05/28/2026 at 09:09:05",
+          "lastUpdated": "05/28/2026 at 09:19:56"
+        },
+        {
+          "host_ip": "192.168.18.60",
           "host_name": "unknown",
           "host_os": "unknown",
           "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.202",
-          "host_name": "unknown",
-          "host_os": "unknown",
-          "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.203",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 11 21H2",
-          "openPorts": "[{\"port\":902,\"protocol\":\"tcp\",\"service\":\"iss-realsecure\",\"method\":\"table\"},{\"port\":912,\"protocol\":\"tcp\",\"service\":\"apex-mesh\",\"method\":\"table\"},{\"port\":5357,\"protocol\":\"tcp\",\"service\":\"wsdapi\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.207",
-          "host_name": "unknown",
-          "host_os": "unknown",
-          "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.208",
-          "host_name": "unknown",
-          "host_os": "unknown",
-          "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.211",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 11 21H2",
-          "openPorts": "[{\"port\":902,\"protocol\":\"tcp\",\"service\":\"iss-realsecure\",\"method\":\"table\"},{\"port\":912,\"protocol\":\"tcp\",\"service\":\"apex-mesh\",\"method\":\"table\"},{\"port\":5357,\"protocol\":\"tcp\",\"service\":\"wsdapi\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.212",
-          "host_name": "unknown",
-          "host_os": "unknown",
-          "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.213",
-          "host_name": "unknown",
-          "host_os": "unknown",
-          "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.215",
-          "host_name": "unknown",
-          "host_os": "unknown",
-          "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.216",
-          "host_name": "unknown",
-          "host_os": "unknown",
-          "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.217",
-          "host_name": "unknown",
-          "host_os": "unknown",
-          "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.219",
-          "host_name": "unknown",
-          "host_os": "unknown",
-          "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.220",
-          "host_name": "unknown",
-          "host_os": "unknown",
-          "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.221",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 11 21H2",
-          "openPorts": "[{\"port\":902,\"protocol\":\"tcp\",\"service\":\"iss-realsecure\",\"method\":\"table\"},{\"port\":912,\"protocol\":\"tcp\",\"service\":\"apex-mesh\",\"method\":\"table\"},{\"port\":5357,\"protocol\":\"tcp\",\"service\":\"wsdapi\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.223",
-          "host_name": "unknown",
-          "host_os": "unknown",
-          "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
-        },
-        {
-          "host_ip": "172.30.199.117",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 10 1607 - 11 23H2",
-          "openPorts": "[{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":902,\"protocol\":\"tcp\",\"service\":\"iss-realsecure\",\"method\":\"table\"},{\"port\":912,\"protocol\":\"tcp\",\"service\":\"apex-mesh\",\"method\":\"table\"},{\"port\":3001,\"protocol\":\"tcp\",\"service\":\"nessus\",\"method\":\"table\"},{\"port\":3306,\"protocol\":\"tcp\",\"service\":\"mysql\",\"method\":\"table\"},{\"port\":6969,\"protocol\":\"tcp\",\"service\":\"acmsoda\",\"method\":\"table\"},{\"port\":16992,\"protocol\":\"tcp\",\"service\":\"amt-soap-http\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
+          "last_ping": "05/28/2026 at 12:53:54",
           "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:06",
-          "lastUpdated": "01/20/2026 at 12:43:06"
+          "firstSeen": "05/28/2026 at 09:09:05",
+          "lastUpdated": "05/28/2026 at 09:09:05"
+        },
+        {
+          "host_ip": "192.168.18.48",
+          "host_name": "Mi PC",
+          "host_os": "Linux 5.0 - 5.7",
+          "openPorts": "[{\"port\":80,\"protocol\":\"tcp\",\"service\":\"http\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":443,\"protocol\":\"tcp\",\"service\":\"https\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":1234,\"protocol\":\"tcp\",\"service\":\"hotline\",\"method\":\"table\"},{\"port\":3001,\"protocol\":\"tcp\",\"service\":\"nessus\",\"method\":\"table\"}]",
+          "last_ping": "05/28/2026 at 12:53:54",
+          "isAlive": true,
+          "firstSeen": "05/28/2026 at 09:09:05",
+          "lastUpdated": "05/28/2026 at 09:20:15"
         }
       ],
-      "createdAt": "01/20/2026 at 12:41:59",
-      "lastUpdated": "01/20/2026 at 12:50:02"
+      "createdAt": "05/28/2026 at 09:07:18",
+      "lastUpdated": "05/28/2026 at 12:53:54"
     },
     {
-      "interface": "Ethernet 3",
-      "ip": "192.168.56.1",
-      "netmask": "255.255.255.0",
-      "cidr": "192.168.56.0/24",
-      "hosts": [
-        {
-          "host_ip": "192.168.56.1",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 10 1607 - 11 23H2",
-          "openPorts": "[{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":902,\"protocol\":\"tcp\",\"service\":\"iss-realsecure\",\"method\":\"table\"},{\"port\":912,\"protocol\":\"tcp\",\"service\":\"apex-mesh\",\"method\":\"table\"},{\"port\":3001,\"protocol\":\"tcp\",\"service\":\"nessus\",\"method\":\"table\"},{\"port\":3306,\"protocol\":\"tcp\",\"service\":\"mysql\",\"method\":\"table\"},{\"port\":6969,\"protocol\":\"tcp\",\"service\":\"acmsoda\",\"method\":\"table\"},{\"port\":16992,\"protocol\":\"tcp\",\"service\":\"amt-soap-http\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:43:28",
-          "lastUpdated": "01/20/2026 at 12:43:28"
-        }
-      ],
-      "createdAt": "01/20/2026 at 12:41:59",
-      "lastUpdated": "01/20/2026 at 12:50:02"
+      "interface": "ham0",
+      "ip": "25.40.2.28",
+      "netmask": "255.0.0.0",
+      "cidr": "25.0.0.0/8",
+      "hosts": [],
+      "createdAt": "05/28/2026 at 09:07:18",
+      "lastUpdated": "05/28/2026 at 09:07:18"
     },
     {
-      "interface": "VMware Network Adapter VMnet1",
-      "ip": "192.168.220.1",
-      "netmask": "255.255.255.0",
-      "cidr": "192.168.220.0/24",
+      "interface": "tailscale0",
+      "ip": "100.79.58.32",
+      "netmask": "255.255.255.255",
+      "cidr": "100.79.58.32/32",
       "hosts": [
         {
-          "host_ip": "192.168.220.254",
-          "host_name": "unknown",
-          "host_os": "unknown",
-          "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:44:14",
-          "lastUpdated": "01/20/2026 at 12:44:14"
-        },
-        {
-          "host_ip": "192.168.220.1",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 10 1607 - 11 23H2",
-          "openPorts": "[{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":902,\"protocol\":\"tcp\",\"service\":\"iss-realsecure\",\"method\":\"table\"},{\"port\":912,\"protocol\":\"tcp\",\"service\":\"apex-mesh\",\"method\":\"table\"},{\"port\":3001,\"protocol\":\"tcp\",\"service\":\"nessus\",\"method\":\"table\"},{\"port\":3306,\"protocol\":\"tcp\",\"service\":\"mysql\",\"method\":\"table\"},{\"port\":6969,\"protocol\":\"tcp\",\"service\":\"acmsoda\",\"method\":\"table\"},{\"port\":16992,\"protocol\":\"tcp\",\"service\":\"amt-soap-http\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
+          "host_ip": "100.79.58.32",
+          "host_name": "izansola-b360m-hd3-1.tail6388ad.ts.net",
+          "host_os": "Linux 5.0 - 5.7",
+          "openPorts": "[{\"port\":80,\"protocol\":\"tcp\",\"service\":\"http\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":443,\"protocol\":\"tcp\",\"service\":\"https\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":1234,\"protocol\":\"tcp\",\"service\":\"hotline\",\"method\":\"table\"},{\"port\":3001,\"protocol\":\"tcp\",\"service\":\"nessus\",\"method\":\"table\"}]",
+          "last_ping": "05/28/2026 at 12:53:54",
           "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:44:14",
-          "lastUpdated": "01/20/2026 at 12:44:14"
+          "firstSeen": "05/28/2026 at 09:18:28",
+          "lastUpdated": "05/28/2026 at 09:18:28"
         }
       ],
-      "createdAt": "01/20/2026 at 12:41:59",
-      "lastUpdated": "01/20/2026 at 12:50:02"
-    },
-    {
-      "interface": "VMware Network Adapter VMnet8",
-      "ip": "192.168.106.1",
-      "netmask": "255.255.255.0",
-      "cidr": "192.168.106.0/24",
-      "hosts": [
-        {
-          "host_ip": "192.168.106.254",
-          "host_name": "unknown",
-          "host_os": "unknown",
-          "openPorts": "[]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": false,
-          "firstSeen": "01/20/2026 at 12:45:01",
-          "lastUpdated": "01/20/2026 at 12:45:01"
-        },
-        {
-          "host_ip": "192.168.106.1",
-          "host_name": "unknown",
-          "host_os": "Microsoft Windows 10 1607 - 11 23H2",
-          "openPorts": "[{\"port\":135,\"protocol\":\"tcp\",\"service\":\"msrpc\",\"method\":\"table\"},{\"port\":139,\"protocol\":\"tcp\",\"service\":\"netbios-ssn\",\"method\":\"table\"},{\"port\":445,\"protocol\":\"tcp\",\"service\":\"microsoft-ds\",\"method\":\"table\"},{\"port\":902,\"protocol\":\"tcp\",\"service\":\"iss-realsecure\",\"method\":\"table\"},{\"port\":912,\"protocol\":\"tcp\",\"service\":\"apex-mesh\",\"method\":\"table\"},{\"port\":3001,\"protocol\":\"tcp\",\"service\":\"nessus\",\"method\":\"table\"},{\"port\":3306,\"protocol\":\"tcp\",\"service\":\"mysql\",\"method\":\"table\"},{\"port\":6969,\"protocol\":\"tcp\",\"service\":\"acmsoda\",\"method\":\"table\"},{\"port\":16992,\"protocol\":\"tcp\",\"service\":\"amt-soap-http\",\"method\":\"table\"}]",
-          "last_ping": "01/20/2026 at 12:50:02",
-          "isAlive": true,
-          "firstSeen": "01/20/2026 at 12:45:01",
-          "lastUpdated": "01/20/2026 at 12:45:01"
-        }
-      ],
-      "createdAt": "01/20/2026 at 12:41:59",
-      "lastUpdated": "01/20/2026 at 12:50:02"
+      "createdAt": "05/28/2026 at 09:07:18",
+      "lastUpdated": "05/28/2026 at 12:53:54"
     }
   ]
 }

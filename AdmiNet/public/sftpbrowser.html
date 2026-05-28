@@ -1,60 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>SFTP File Browser</title>
+    <title>AdminetWork — SFTP</title>
     <link rel="stylesheet" href="css/sftp.css">
+    <script src="./libs/jquery-3.7.1.js"></script>
     <script type="module" src="js/SFTPFunctions.js"></script>
 </head>
+
 <body>
     <div class="app">
-        <div class="main">
-            <div id="sftp-action-buttons">
-                <label for="file-input" id="file-input-label">
-                    <p>Choose file</p>
-                </label>
-                <input type="file" id="file-input" value="Choose file">
-                <button id="upload-file" onclick="uploadFile()">Upload File</button>
+
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <div class="logo">NP</div>
+                <span class="toolbar-title">SFTP Browser</span>
+                <span id="path" class="current-path">/</span>
             </div>
-            
-            <div id="fileBrowser" class="content">
-                <h2 id="path"></h2>
-                <table id="fileTable">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Size</th>
-                            <th>Modified</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <div class="toolbar-right">
+                <label for="file-input" class="btn btn-ghost">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    Choose file
+                </label>
+                <input type="file" id="file-input">
+                <span id="file-name" class="file-name-display">No file chosen</span>
+                <button id="upload-file" class="btn btn-accent" onclick="uploadFile()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    Upload
+                </button>
             </div>
         </div>
+
+        <div id="fileBrowser" class="content">
+            <table id="fileTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Size</th>
+                        <th>Modified</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="upload-progress-bar" class="progress-bar hidden">
+            <div id="upload-progress-fill" class="progress-fill"></div>
+        </div>
+
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            username = sessionStorage.getItem('ssh_user')
-            password = sessionStorage.getItem('ssh_pass')
-            const initialFiles = sessionStorage.getItem('initial_files')
-            const initialDir = sessionStorage.getItem('initial_dir')
+        document.getElementById('file-input').addEventListener('change', function () {
+            const name = this.files[0] ? this.files[0].name : 'No file chosen';
+            document.getElementById('file-name').textContent = name;
+        });
 
-            if (!username || !password) {
-                alert('Not logged in!')
-                window.location.href = 'index.html'
-                return
+        document.addEventListener('DOMContentLoaded', function () {
+            const u = sessionStorage.getItem('ssh_user');
+            const p = sessionStorage.getItem('ssh_pass');
+            const i = sessionStorage.getItem('ssh_ip');
+            const initialFiles = sessionStorage.getItem('initial_files');
+            const initialDir = sessionStorage.getItem('initial_dir');
+
+            if (!u || !p) {
+                alert('Not logged in!');
+                window.location.href = 'index.html';
+                return;
             }
+
+            window.setSessionVars(u, p, i);
 
             if (initialFiles && initialDir) {
-                renderFiles(JSON.parse(initialFiles), initialDir)
-                sessionStorage.removeItem('initial_files')
-                sessionStorage.removeItem('initial_dir')
+                renderFiles(JSON.parse(initialFiles), initialDir);
+                sessionStorage.removeItem('initial_files');
+                sessionStorage.removeItem('initial_dir');
             } else {
-                loadDir('.')
+                loadDir('.');
             }
-        })
+        });
     </script>
 </body>
+
 </html>

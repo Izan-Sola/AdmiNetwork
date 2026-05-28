@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>NetPanel — Layout</title>
+  <title>AdminetWork — Layout</title>
   <link rel="stylesheet" href="css/styles.css">
   <script src="libs/require.js"></script>
   <script src="libs/jquery-3.7.1.js"></script>
@@ -23,7 +23,7 @@
       <div class="brand">
         <div class="logo">NP</div>
         <div>
-          <h1>NetPanel</h1>
+          <h1>AdminetWork</h1>
           <p>Network administration</p>
         </div>
       </div>
@@ -37,14 +37,13 @@
         <div style="display:flex;justify-content:space-between;gap:8px">
           <button class="btn" type="button" onclick="networkScan()">Scan Network</button>
           <button class="btn" type="button" onclick="scanAllNetworks()">Auto-Scan</button>
-          <button class="btn btn-ghost" type="button"
-            style="background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.03)">Import</button>
+          <button class="btn btn-ghost" type="button">Import</button>
         </div>
       </div>
 
       <div style="font-size:13px;color:var(--muted);margin-top:6px">Available networks</div>
-      <div class="networks" role="list">
-        <!-- <div class="footer">Logged as <strong>admin</strong></div> -->
+      <div class="networks" role="list"></div>
+
     </aside>
 
     <main class="main" role="main">
@@ -63,12 +62,31 @@
 
       <section class="content" aria-live="polite">
         <h2 style="margin:10px;font-size:18px">Devices</h2>
-
-        <div class="cards" aria-label="Devices list">
-
-        </div>
+        <div class="cards" aria-label="Devices list"></div>
       </section>
+
+      <div id="detail-panel" class="detail-panel">
+        <div id="detail-handle" class="detail-handle">
+          <div class="detail-handle-bar"></div>
+          <span id="detail-panel-title" class="detail-panel-title">No device selected</span>
+          <button class="btn-ghost detail-close-btn" id="detail-close">✕</button>
+        </div>
+        <div class="detail-tabs">
+          <button class="detail-tab active" data-tab="ports">Ports &amp; Services</button>
+          <button class="detail-tab" data-tab="logs">Logs</button>
+        </div>
+        <div class="detail-body">
+          <div id="tab-ports" class="tab-content active">
+            <p class="detail-empty">Select a device and click Details.</p>
+          </div>
+          <div id="tab-logs" class="tab-content">
+            <p class="detail-empty">No logs for this device yet.</p>
+          </div>
+        </div>
+      </div>
+
     </main>
+
     <div id="cover" class="hidden"></div>
 
     <div id="scan-in-progress" class="hidden">
@@ -80,16 +98,15 @@
           <span id="mail-icon">🖥️</span>
           <span id="progress-bar"></span>
           <span id="pc-icon">📑</span>
-          <!-- 📋📝🗒️🗒️🧾📃✉️ -->
         </div>
       </div>
       <p id="scan-completed"></p>
     </div>
 
   </div>
+
   <div class="bottom-bar">
     <button id="connect-btn" class="btn">Connect to Selected Device</button>
-
     <div id="connect-menu" class="connect-menu hidden">
       <div class="menu-item" onclick="connectSSH()">SSH</div>
       <div class="menu-item" onclick="connectTelnet()">Telnet</div>
@@ -97,13 +114,35 @@
     </div>
   </div>
 
+  <!-- SFTP login modal — outside .app so position:fixed anchors to viewport -->
+  <div id="loginBox">
+    <div class="modal-card">
 
+      <h3 class="modal-title">
+        🔒 SFTP — <span id="sftp-modal-ip"></span>
+      </h3>
 
-  <div id="loginBox" class="scan-box">
-    <h2>🔐 Connect to SFTP</h2> <input type="text" id="username" placeholder="Username"> <input type="password"
-      id="password" placeholder="Password"> <button class="btn" onclick="connectSFTP()">Connect</button>
-    <div id="loginError" class="error"></div>
+      <input type="text" id="username" placeholder="Username" onblur="tryAutofillCredentials()" />
+      <input type="password" id="password" placeholder="Password" />
+
+      <label class="modal-remember">
+        <input type="checkbox" id="rememberMe" /> Remember credentials
+      </label>
+
+      <div id="loginError" class="modal-error"></div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="document.getElementById('loginBox').classList.remove('visible')">
+          Cancel
+        </button>
+        <button class="btn-connect" onclick="connectSFTP()">
+          Connect
+        </button>
+      </div>
+
+    </div>
   </div>
+
 </body>
 
 </html>

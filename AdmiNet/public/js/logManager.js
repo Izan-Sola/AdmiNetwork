@@ -1,78 +1,47 @@
 export { insertLog, displayLog }
 
-    let device_logs = []
-
-    var example_log = { 
-                    IP: "192.168.100.10",
-                    action: "sftp", //or sftp, telnet, ssh
-                    type: "error", //or warning, error, info
-                    message: "Ping timedout at (time,date)",
-                    timestamp: "None"
-    }
-    device_logs.push(example_log)
-    var example_log = { 
-                    IP: "192.168.100.15",
-                    action: "telnet", 
-                    type: "info", 
-                    message: "Ping timedout at (time,date)",
-    }
-    device_logs.push(example_log)
-
 function insertLog(IP, action, type, message) {
+    const timestamp = getDate();
+    const new_log = { IP, action, type, message, timestamp };
 
-    var timestamp = getDate()
-    var new_log = {
-        IP: IP,
-        action: action,
-        type: type,
-        message: message,
-        timestamp: timestamp
-    }
-    device_logs.push(new_log)
-    console.log(new_log)
+    console.log(new_log);
 
     fetch('/updateLog', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ log: new_log })
-    })
-
+    }).catch(err => console.error('Failed to save log:', err));
 }
-//* Display all logs. Optionally accepts filter options
+
 function displayLog({ IP = null, type = "all", action = "all" } = {}) {
     fetch('/retrieveLog', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ empty: "" })
+        body: JSON.stringify({})
     })
     .then(res => res.json())
     .then(data => {
-        const logsToDisplay = data.tempLogs.filter(log => {
+        const logsToDisplay = (data.tempLogs || []).filter(log => {
             if (IP !== null && log.IP !== IP) return false;
             if (type !== "all" && log.type !== type) return false;
-            if (action !== "all" && log.action !== type) return false;
+            if (action !== "all" && log.action !== action) return false;
             return true;
         });
         console.log(logsToDisplay);
+        return logsToDisplay;
     });
 }
 
 function getDate() {
-    var now = new Date();
-    var dd = String(now.getDate()).padStart(2, '0');
-    var mm = String(now.getMonth() + 1).padStart(2, '0');
-    var h = String(now.getHours())
-    var m = String(now.getMinutes())
-    var s = String(now.getSeconds())
-    var yyyy = String(now.getFullYear())
-
-    now = mm + '/' + dd + '/' + yyyy + ' at ' + h + ':' + m + ':' + s;
-
-    return String(now);
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const h  = String(now.getHours()).padStart(2, '0');
+    const m  = String(now.getMinutes()).padStart(2, '0');
+    const s  = String(now.getSeconds()).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    return `${mm}/${dd}/${yyyy} at ${h}:${m}:${s}`;
 }
 
-$(document).ready(function () {
-    insertLog(example_log.IP, example_log.action, example_log.type, example_log.message)
-});
 window.insertLog = insertLog;
 window.displayLog = displayLog;
