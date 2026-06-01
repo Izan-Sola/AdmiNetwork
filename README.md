@@ -1,6 +1,6 @@
 # AdmiNetwork (WIP) (proyecto grado superior)
 
-Administrate the available networks with this Electron web applicaton.
+Administrate the available networks with this ~~Electron (no time)~~  applicaton.
 
 Scan all the available networks and its hosts, servers, virtual machines, retrieving advanced info like the operative system, open ports, active services...
 Connect to any available device remotely if possible with SSH, SFTP or telnet.
