@@ -9,8 +9,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css">
 </head>
 <body>
-  <button id="demo-connect" class="connect-btn">CONNECT (demo)</button>
-
   <div id="ssh-panel" class="ssh-panel hidden" role="dialog" aria-label="SSH panel">
     <header class="topbar">
       <div class="brand">
@@ -35,9 +33,7 @@
       <main class="main">
         <div class="controls-row">
           <div class="left-controls">
-            <!-- <button class="btn small">Reconnect</button>
-            <button class="btn small">Refresh</button>
-            <button class="btn small">Upload Key</button> -->
+
           </div>
           <div class="ip-display">IP: <span id="device-ip">192.168.1.10</span></div>
         </div>
@@ -46,15 +42,23 @@
           <div id="xterm" class="terminal-screen"></div>
         </div>
 
-        <!-- <div class="typing-bar">
-          <input id="cmd-input" class="cmd-input" placeholder="Type a command and press Enter" />
-          <button id="send-cmd" class="btn">Send</button>
-        </div> -->
       </main>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
   <script type="module" src="js/terminal.js"></script>
+  <script>
+    (async function () {
+      const token = sessionStorage.getItem('auth_token');
+      if (!token) { window.location.href = 'login.html'; return; }
+      const res = await fetch('/auth/verify', {
+        method: 'POST',
+        headers: { 'x-auth-token': token }
+      });
+      const data = await res.json();
+      if (!data.success) { window.location.href = 'login.html'; return; }
+    })();
+  </script>
 </body>
 </html>

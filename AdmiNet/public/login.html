@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AdminetWork — Login</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body style="display:flex;align-items:center;justify-content:center;height:100vh;margin:0">
+    <div class="modal-card" style="min-width:320px;display:flex;flex-direction:column;gap:12px">
+        <h2 style="margin:0">AdminetWork</h2>
+        <p style="margin:0;opacity:0.6;font-size:13px">Sign in to continue</p>
+        <input type="text" id="username" placeholder="Username" />
+        <input type="password" id="password" placeholder="Password" />
+        <div id="loginError" class="modal-error"></div>
+        <button class="btn" id="loginBtn">Sign in</button>
+    </div>
+
+    <script>
+        // Redirect if already logged in
+        if (sessionStorage.getItem('auth_token')) {
+            fetch('/auth/verify', {
+                method: 'POST',
+                headers: { 'x-auth-token': sessionStorage.getItem('auth_token') }
+            }).then(r => r.json()).then(d => {
+                if (d.success) window.location.href = 'index.html';
+            });
+        }
+
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            document.getElementById('loginError').textContent = '';
+
+            if (!username || !password) {
+                document.getElementById('loginError').textContent = 'Fill in all fields.';
+                return;
+            }
+
+            const res = await fetch('/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                sessionStorage.setItem('auth_token', data.token);
+                sessionStorage.setItem('auth_user', data.username);
+                window.location.href = 'index.html';
+            } else {
+                document.getElementById('loginError').textContent = data.error || 'Login failed.';
+            }
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Enter') document.getElementById('loginBtn').click();
+        });
+    </script>
+</body>
+
+</html>

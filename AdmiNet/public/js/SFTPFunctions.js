@@ -27,7 +27,7 @@ async function connectSFTP() {
 
   const res = await fetch('/api/list', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  headers: authHeaders(),
     body: JSON.stringify({ username, password, dir: '.', ip })
   });
   const data = await res.json();
@@ -69,7 +69,7 @@ async function tryAutofillCredentials() {
   try {
     const res = await fetch('/api/credentials/get', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders(),
       body: JSON.stringify({ ip: deviceIP, username: currentUser })
     });
     const data = await res.json();
@@ -86,7 +86,7 @@ async function saveCredentials(ip, username, password) {
   try {
     await fetch('/api/credentials/save', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify({ ip, username, password })
     });
   } catch (e) {
@@ -98,7 +98,7 @@ async function deleteCredentials(ip, username) {
   try {
     await fetch('/api/credentials/delete', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+       headers: authHeaders(),
       body: JSON.stringify({ ip, username })
     });
   } catch (e) {
@@ -109,7 +109,7 @@ async function deleteCredentials(ip, username) {
 async function loadDir(dir) {
   const res = await fetch('/api/list', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders(),
     body: JSON.stringify({ username, password, dir, ip })
   });
   const data = await res.json();
@@ -158,7 +158,7 @@ function renderFiles(files, dir) {
       downloadButton.onclick = async () => {
         const res = await fetch('/api/download', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify({ username, password, filePath: `${dir}/${f.name}`, ip })
         });
         if (res.ok) {

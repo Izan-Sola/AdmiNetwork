@@ -30,6 +30,7 @@ let barArray = [];
 
 // Currently inspected host IP (for the detail panel)
 let detailHostIP = null;
+import { authHeaders } from './api.js';
 
 import { insertLog, displayLog } from "./logManager.js";
 
@@ -72,7 +73,7 @@ function renderLogsForHost(ip, container) {
     // Pull logs from the server for this IP
     fetch('/retrieveLog', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ empty: "" })
     })
         .then(res => res.json())
@@ -175,7 +176,7 @@ function networkScan(subnet = 0) {
 
     fetch('/scanNetwork', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ subnet })
     })
         .then(res => res.json())
@@ -186,7 +187,7 @@ function networkScan(subnet = 0) {
 
                 fetch('/loadNetworkData', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: authHeaders(),
                     body: JSON.stringify({ network: networkCIDR })
                 })
                     .then(res => res.json())
@@ -229,8 +230,7 @@ function appendHostsAndNetworks(hosts, networks) {
     closeDetailPanel();
 
     if (hosts && hosts.length > 0) {
-        $('.stats strong')[1].innerText = hosts.length;
-
+        updateStats(hosts, selectedNetworkCIDR || networks?.[0]?.cidr);
         hosts.forEach(host => {
             matchedOS = regExpOS.exec(host.host_os);
             if (matchedOS) {
@@ -292,6 +292,8 @@ function appendHostsAndNetworks(hosts, networks) {
             });
 
             $('.cards').append(cardEl);
+            cardEl.data('open-ports', host.openPorts);
+            cardEl.data('host-os', host.host_os);
         });
     }
 
@@ -374,7 +376,7 @@ function scanAllNetworks() {
 
     fetch('/getAllNetworks', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({})
     })
         .then(res => res.json())
@@ -387,7 +389,7 @@ function scanAllNetworks() {
                 data.networks.forEach(network => {
                     fetch('/loadNetworkData', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: authHeaders(),
                         body: JSON.stringify({ network: network.cidr })
                     })
                         .then(res => res.json())
@@ -446,7 +448,7 @@ function scanAllNetworks() {
 function loadAllNetworks() {
     fetch('/loadNetworkData', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ network: 0 })
     })
         .then(res => res.json())
@@ -493,7 +495,7 @@ function loadNetwork(networkCIDR) {
     console.log(`Loading hosts for ${networkCIDR} from server...`);
     fetch('/loadNetworkData', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ network: networkCIDR })
     })
         .then(res => res.json())
@@ -527,7 +529,7 @@ function saveDeviceCardInfo() {
 
     fetch('/updateHostDetails', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
             newName: inputName.val(),
             newOs: inputOs.val(),
@@ -605,7 +607,7 @@ function pingAllHosts() {
 
     fetch('/pingAllHosts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ allHostsToPing })
     })
         .then(res => res.json())
@@ -618,7 +620,7 @@ function pingAllHosts() {
 function getAllNetworksHosts() {
     fetch('/getAllNetworksHosts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({})
     })
         .then(res => res.json())
@@ -652,7 +654,7 @@ function removeDeviceCard(card) {
     if (opt) {
         fetch('/removeHost', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders(),
             body: JSON.stringify({ hostIP, selectedNetworkCIDR })
         })
             .then(res => {
@@ -684,7 +686,7 @@ function removeNetwork() {
     if (opt) {
         fetch('/removeNetwork', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders(),
             body: JSON.stringify({ selectedNetworkCIDR })
         })
             .then(res => {
@@ -735,6 +737,15 @@ function resumePing() {
     if (!pingInterval) {
         pingInterval = setInterval(pingAllHosts, 5000);
     }
+}
+//
+
+function updateStats(hosts, networkLabel) {
+    const scanned = hosts ? hosts.length : 0;
+    const active = hosts ? hosts.filter(h => h.isAlive).length : 0;
+    document.getElementById('stat-network').textContent = networkLabel || '—';
+    document.getElementById('stat-scanned').textContent = scanned;
+    document.getElementById('stat-active').textContent = active;
 }
 
 // ── Global exports ────────────────────────────────────────────────────────────

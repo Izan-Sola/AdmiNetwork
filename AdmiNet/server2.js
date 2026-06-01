@@ -44,7 +44,25 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.static('public'));
+function requireAuth(req, res, next) {
+    // Allow login endpoint through
+    if (req.path === '/auth/login') return next();
+    const token = req.headers['x-auth-token'];
+    if (token && sessions.has(token)) return next();
+    res.status(401).json({ success: false, error: 'Unauthorized' });
+}
 
+app.use('/api', requireAuth);
+app.use('/scanNetwork', requireAuth);
+app.use('/getAllNetworks', requireAuth);
+app.use('/loadNetworkData', requireAuth);
+app.use('/getAllNetworksHosts', requireAuth);
+app.use('/pingAllHosts', requireAuth);
+app.use('/updateHostDetails', requireAuth);
+app.use('/removeHost', requireAuth);
+app.use('/removeNetwork', requireAuth);
+app.use('/updateLog', requireAuth);
+app.use('/retrieveLog', requireAuth);
 require('events').EventEmitter.defaultMaxListeners = 50;
 
 //? <------ WEBSOCKET ------>
@@ -546,9 +564,9 @@ app.post('/scanNetwork', async (req, res) => {
                 console.log(`NMAP found ${data.length} hosts in ${targetCIDR}. Saving hosts...`);
                 
                 try {
-                    await addHosts(targetCIDR, data);
+                    await addHosts(networkInfo.cidr, data);
                     console.log(`Successfully saved ${data.length} hosts for network ${targetCIDR}`);
-                    resolve({ network: targetCIDR, hosts: data.length, success: true });
+                    resolve({ network: networkInfo.cidr, hosts: data.length, success: true });
                 } catch (error) {
                     console.error(`Error saving hosts for ${targetCIDR}:`, error);
                     reject(error);
@@ -1056,5 +1074,50 @@ app.post('/api/credentials/check-key', async (req, res) => {
         res.json({ exists: true });
     } catch {
         res.json({ exists: false });
+    }
+});
+
+//? <------ LOGIN ------>
+const crypto = require('crypto');
+const USERS_FILE = path.join(__dirname, 'users.json');
+
+// In-memory session store: token -> username
+const sessions = new Map();
+
+function generateToken() {
+    return crypto.randomBytes(32).toString('hex');
+}
+
+app.post('/auth/login', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password)
+        return res.status(400).json({ success: false, error: 'Missing credentials' });
+
+    try {
+        const raw = await fs.readFile(USERS_FILE, 'utf8');
+        const { users } = JSON.parse(raw);
+        const user = users.find(u => u.username === username && u.password === password);
+        if (!user) return res.status(401).json({ success: false, error: 'Invalid credentials' });
+
+        const token = generateToken();
+        sessions.set(token, username);
+        res.json({ success: true, token, username });
+    } catch (err) {
+        res.status(500).json({ success: false, error: 'Server error' });
+    }
+});
+
+app.post('/auth/logout', (req, res) => {
+    const token = req.headers['x-auth-token'];
+    if (token) sessions.delete(token);
+    res.json({ success: true });
+});
+
+app.post('/auth/verify', (req, res) => {
+    const token = req.headers['x-auth-token'];
+    if (token && sessions.has(token)) {
+        res.json({ success: true, username: sessions.get(token) });
+    } else {
+        res.status(401).json({ success: false });
     }
 });

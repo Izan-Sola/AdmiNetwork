@@ -54,9 +54,9 @@
           <button class="btn-ghost" onclick="removeNetwork()">Remove Network 🗑️</button>
         </div>
         <div class="stats">
-          <div>Network: <strong>LAN</strong></div>
-          <div>Scanned: <strong>12</strong></div>
-          <div>Active: <strong style="color:var(--success)">9</strong></div>
+          <div>Network: <strong id="stat-network">—</strong></div>
+          <div>Scanned: <strong id="stat-scanned">0</strong></div>
+          <div>Active: <strong id="stat-active" style="color:var(--success)">0</strong></div>
         </div>
       </div>
 
@@ -142,7 +142,18 @@
 
     </div>
   </div>
-
+  <script>
+    (async function () {
+      const token = sessionStorage.getItem('auth_token');
+      if (!token) { window.location.href = 'login.html'; return; }
+      const res = await fetch('/auth/verify', {
+        method: 'POST',
+        headers: { 'x-auth-token': token }
+      });
+      const data = await res.json();
+      if (!data.success) { window.location.href = 'login.html'; return; }
+    })();
+  </script>
 </body>
 
 </html>

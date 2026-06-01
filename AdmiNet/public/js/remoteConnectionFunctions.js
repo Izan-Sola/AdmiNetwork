@@ -9,6 +9,14 @@ async function connectSSH() {
 
 function showSSHModal(ip) {
     $('#sshModal').remove();
+    const card = $('.device-card.selected')[0];
+    const hostOs = card ? $(card).data('host-os') : '—';
+    let portsList = '—', servicesList = '—';
+    try {
+        const parsed = JSON.parse($(card).data('open-ports') || '[]');
+        portsList = parsed.map(p => p.port).join(', ') || '—';
+        servicesList = parsed.map(p => p.service).join(', ') || '—';
+    } catch { }
 
     const modal = $(`
         <div id="sshModal" style="
@@ -102,7 +110,7 @@ function showSSHModal(ip) {
         try {
             const res = await fetch('/api/credentials/get', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+             headers: authHeaders(),
                 body: JSON.stringify({ ip, username })
             });
             const data = await res.json();
@@ -120,7 +128,9 @@ function showSSHModal(ip) {
             }
         } catch (e) { /* keytar unavailable */ }
     });
-
+    sessionStorage.setItem('ssh_os', hostOs);
+    sessionStorage.setItem('ssh_ports', portsList);
+    sessionStorage.setItem('ssh_services', servicesList);
     $('#sshCancelBtn').on('click', () => modal.remove());
 
     $('#sshConnectBtn').on('click', async () => {
@@ -141,13 +151,13 @@ function showSSHModal(ip) {
             if (remember) {
                 await fetch('/api/credentials/save', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: authHeaders(),
                     body: JSON.stringify({ ip, username: user, credential: { type: 'password', password: pass } })
                 }).catch(() => { });
             } else {
                 await fetch('/api/credentials/delete', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                   headers: authHeaders(),
                     body: JSON.stringify({ ip, username: user })
                 }).catch(() => { });
             }
@@ -167,7 +177,7 @@ function showSSHModal(ip) {
             try {
                 const checkRes = await fetch('/api/credentials/check-key', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: authHeaders(),
                     body: JSON.stringify({ keyPath })
                 });
                 const checkData = await checkRes.json();
@@ -183,13 +193,13 @@ function showSSHModal(ip) {
             if (remember) {
                 await fetch('/api/credentials/save', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                   headers: authHeaders(),
                     body: JSON.stringify({ ip, username: user, credential: { type: 'key', keyPath, passphrase } })
                 }).catch(() => { });
             } else {
                 await fetch('/api/credentials/delete', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: authHeaders(),
                     body: JSON.stringify({ ip, username: user })
                 }).catch(() => { });
             }
@@ -201,7 +211,9 @@ function showSSHModal(ip) {
             sessionStorage.removeItem('ssh_pass');
             sessionStorage.setItem('ssh_auth', 'key');
         }
-
+        sessionStorage.setItem('ssh_os', hostOs);
+        sessionStorage.setItem('ssh_ports', portsList);
+        sessionStorage.setItem('ssh_services', servicesList);
         modal.remove();
         window.location.href = 'console.html';
     });

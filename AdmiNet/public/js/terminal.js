@@ -9,7 +9,11 @@ const authType = sessionStorage.getItem('ssh_auth') || 'password';
 const pass = sessionStorage.getItem('ssh_pass');
 const keyPath = sessionStorage.getItem('ssh_key_path');
 const passphrase = sessionStorage.getItem('ssh_passphrase') || '';
-
+document.getElementById('device-ip').textContent = ip || '—';
+document.querySelector('.userinfo').textContent = (user && ip) ? `${user}@${ip}` : '—';
+document.getElementById('os').textContent = sessionStorage.getItem('ssh_os') || '—';
+document.getElementById('ports').textContent = sessionStorage.getItem('ssh_ports') || '—';
+document.getElementById('services').textContent = sessionStorage.getItem('ssh_services') || '—';
 let term, ws;
 let session_log = [];
 let currentCmd = '';
